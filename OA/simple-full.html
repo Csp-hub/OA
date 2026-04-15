@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园OA系统</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-form {
+            width: 420px;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        .form-item {
+            margin-bottom: 24px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+        }
+        .container {
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .sidebar a:hover {
+            background-color: #e2e8f0;
+        }
+        .main {
+            flex: 1;
+            margin-left: 20px;
+        }
+        .flex {
+            display: flex;
+        }
+        .tab-content {
+            margin-top: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            background-color: #667eea;
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .dialog-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 500px;
+        }
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .dialog-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div v-if="currentPage === 'login'" class="login-container">
+            <div class="login-form">
+                <h2>校园OA系统</h2>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="loginForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="loginForm.password" class="form-input" placeholder="请输入密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">验证码</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" v-model="loginForm.verifyCode" class="form-input" placeholder="请输入验证码" style="flex: 1;">
+                        <div style="display: flex; align-items: center; background-color: #f0f2f5; padding: 0 10px; border-radius: 4px;">
+                            {{ captcha.num1 }} {{ captcha.operator }} {{ captcha.num2 }} = ?
+                        </div>
+                        <button class="btn-primary" @click="generateCaptcha" style="padding: 0 12px;">刷新</button>
+                    </div>
+                </div>
+                <button class="btn-primary" @click="login">登录</button>
+            </div>
+        </div>
+        <div v-else class="container">
+            <div class="header">
+                <h1>校园OA系统</h1>
+                <div>
+                    <span>{{ user.name }}</span>
+                    <button class="btn-primary" @click="logout" style="margin-left: 10px; padding: 6px 12px;">退出</button>
+                </div>
+            </div>
+            <div class="flex">
+                <div class="sidebar">
+                    <ul>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'user'">用户管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'role'">角色管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'permission'">权限管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'course'">课程管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'student'">学生管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'internship'">实习管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'abnormal'">异常学生管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'research'">科研管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'courseStandard'">课程标准评审</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'leave'">请假管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'credit'">学分管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'course'">课程查询</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'score'">成绩查询</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'internship'">实习管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'leave'">请假管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'credit'">学分管理</a></li>
+                        <li v-if="user.type === 3"><a @click="techDeptTab = 'research'">科研管理</a></li>
+                        <li v-if="user.type === 4"><a @click="eduDeptTab = 'course'">课程管理</a></li>
+                        <li v-if="user.type === 4"><a @click="eduDeptTab = 'score'">成绩管理</a></li>
+                        <li v-if="user.type === 4"><a @click="eduDeptTab = 'credit'">学分管理</a></li>
+                        <li v-if="user.type === 5"><a @click="studentAffairsTab = 'abnormal'">异常学生管理</a></li>
+                        <li v-if="user.type === 5"><a @click="studentAffairsTab = 'scholarship'">奖助学金管理</a></li>
+                    </ul>
+                </div>
+                <div class="main">
+                    <!-- 管理员页面 -->
+                    <div v-if="user.type === 0">
+                        <div v-if="adminTab === 'user'">
+                            <h2>用户管理</h2>
+                            <button class="btn-primary" @click="addUser" style="margin-bottom: 20px;">添加用户</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>用户名</th>
+                                        <th>姓名</th>
+                                        <th>类型</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="user in userList" :key="user.id">
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.type === 0 ? '管理员' : user.type === 1 ? '教师' : user.type === 2 ? '学生' : user.type === 3 ? '科技处' : user.type === 4 ? '教务处' : '学生管理处' }}</td>
+                                        <td>{{ user.status === 1 ? '启用' : '禁用' }}</td>
+                                        <td>{{ user.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editUser(user)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteUser(user.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="adminTab === 'role'">
+                            <h2>角色管理</h2>
+                            <button class="btn-primary" @click="addRole" style="margin-bottom: 20px;">添加角色</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>角色名称</th>
+                                        <th>角色代码</th>
+                                        <th>描述</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="role in roleList" :key="role.id">
+                                        <td>{{ role.id }}</td>
+                                        <td>{{ role.roleName }}</td>
+                                        <td>{{ role.roleCode }}</td>
+                                        <td>{{ role.description }}</td>
+                                        <td>{{ role.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editRole(role)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteRole(role.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="adminTab === 'permission'">
+                            <h2>权限管理</h2>
+                            <button class="btn-primary" @click="addPermission" style="margin-bottom: 20px;">添加权限</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>权限名称</th>
+                                        <th>权限代码</th>
+                                        <th>描述</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="permission in permissionList" :key="permission.id">
+                                        <td>{{ permission.id }}</td>
+                                        <td>{{ permission.permissionName }}</td>
+                                        <td>{{ permission.permissionCode }}</td>
+                                        <td>{{ permission.description }}</td>
+                                        <td>{{ permission.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editPermission(permission)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deletePermission(permission.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 教师页面 -->
+                    <div v-else-if="user.type === 1">
+                        <div v-if="teacherTab === 'course'">
+                            <h2>课程管理</h2>
+                            <button class="btn-primary" @click="addCourse" style="margin-bottom: 20px;">添加课程</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editCourse(course)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteCourse(course.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'student'">
+                            <h2>学生管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学号</th>
+                                        <th>姓名</th>
+                                        <th>性别</th>
+                                        <th>班级</th>
+                                        <th>专业</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="student in studentList" :key="student.id">
+                                        <td>{{ student.id }}</td>
+                                        <td>{{ student.studentId }}</td>
+                                        <td>{{ student.name }}</td>
+                                        <td>{{ student.gender }}</td>
+                                        <td>{{ student.className }}</td>
+                                        <td>{{ student.major }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'internship'">
+                            <h2>实习管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学生姓名</th>
+                                        <th>实习单位</th>
+                                        <th>实习时间</th>
+                                        <th>提交状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="internship in internshipList" :key="internship.id">
+                                        <td>{{ internship.id }}</td>
+                                        <td>{{ internship.studentName }}</td>
+                                        <td>{{ internship.company }}</td>
+                                        <td>{{ internship.startDate }} 至 {{ internship.endDate }}</td>
+                                        <td>{{ internship.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewInternship(internship)" style="padding: 4px 8px; font-size: 12px;">审核</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 学生页面 -->
+                    <div v-else-if="user.type === 2">
+                        <div v-if="studentTab === 'course'">
+                            <h2>课程查询</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'score'">
+                            <h2>成绩查询</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>平时成绩</th>
+                                        <th>期末成绩</th>
+                                        <th>总评成绩</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="score in scoreList" :key="score.id">
+                                        <td>{{ score.id }}</td>
+                                        <td>{{ score.courseName }}</td>
+                                        <td>{{ score.courseCode }}</td>
+                                        <td>{{ score.usualScore }}</td>
+                                        <td>{{ score.finalScore }}</td>
+                                        <td>{{ score.totalScore }}</td>
+                                        <td>{{ score.semester }}</td>
+                                        <td>{{ score.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 科技处页面 -->
+                    <div v-else-if="user.type === 3">
+                        <div v-if="techDeptTab === 'research'">
+                            <h2>科研管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课题名称</th>
+                                        <th>申报人</th>
+                                        <th>申报时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="research in researchList" :key="research.id">
+                                        <td>{{ research.id }}</td>
+                                        <td>{{ research.title }}</td>
+                                        <td>{{ research.applicant }}</td>
+                                        <td>{{ research.applyDate }}</td>
+                                        <td>{{ research.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewResearch(research)" style="padding: 4px 8px; font-size: 12px;">评审</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 教务处页面 -->
+                    <div v-else-if="user.type === 4">
+                        <div v-if="eduDeptTab === 'course'">
+                            <h2>课程管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 学生管理处页面 -->
+                    <div v-else-if="user.type === 5">
+                        <div v-if="studentAffairsTab === 'abnormal'">
+                            <h2>异常学生管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学生姓名</th>
+                                        <th>班级</th>
+                                        <th>异常类型</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="abnormal in abnormalList" :key="abnormal.id">
+                                        <td>{{ abnormal.id }}</td>
+                                        <td>{{ abnormal.studentName }}</td>
+                                        <td>{{ abnormal.className }}</td>
+                                        <td>{{ abnormal.type }}</td>
+                                        <td>{{ abnormal.submitDate }}</td>
+                                        <td>{{ abnormal.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewAbnormal(abnormal)" style="padding: 4px 8px; font-size: 12px;">审核</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 用户编辑对话框 -->
+        <div v-if="showUserDialog" class="dialog">
+            <div class="dialog-content">
+                <div class="dialog-header">
+                    <h3>{{ isEditUser ? '编辑用户' : '添加用户' }}</h3>
+                    <button @click="showUserDialog = false">×</button>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="userForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="userForm.password" class="form-input" placeholder="请输入密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">姓名</label>
+                    <input type="text" v-model="userForm.name" class="form-input" placeholder="请输入姓名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">类型</label>
+                    <select v-model="userForm.type" class="form-input">
+                        <option value="0">管理员</option>
+                        <option value="1">教师</option>
+                        <option value="2">学生</option>
+                        <option value="3">科技处</option>
+                        <option value="4">教务处</option>
+                        <option value="5">学生管理处</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">状态</label>
+                    <select v-model="userForm.status" class="form-input">
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-primary" style="margin-right: 10px;" @click="showUserDialog = false">取消</button>
+                    <button class="btn-primary" @click="saveUser">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    currentPage: 'login',
+                    user: null,
+                    loginForm: {
+                        username: '',
+                        password: '',
+                        verifyCode: ''
+                    },
+                    captcha: {
+                        num1: 0,
+                        num2: 0,
+                        operator: '+',
+                        result: 0
+                    },
+                    // 管理员相关
+                    adminTab: 'user',
+                    userList: [
+                        { id: 1, username: 'admin', password: '123456', name: '管理员', type: 0, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 2, username: 'teacher', password: '123456', name: '张老师', type: 1, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 3, username: 'student', password: '123456', name: '李同学', type: 2, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 4, username: 'tech_dept', password: '123456', name: '科技处人员', type: 3, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 5, username: 'edu_dept', password: '123456', name: '教务处人员', type: 4, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 6, username: 'student_affairs', password: '123456', name: '学生管理处人员', type: 5, status: 1, createTime: '2024-01-01 00:00:00' }
+                    ],
+                    showUserDialog: false,
+                    isEditUser: false,
+                    userForm: {
+                        id: '',
+                        username: '',
+                        password: '',
+                        name: '',
+                        type: 0,
+                        status: 1
+                    },
+                    roleList: [
+                        { id: 1, roleName: '管理员', roleCode: 'admin', description: '系统管理员', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, roleName: '教师', roleCode: 'teacher', description: '教师角色', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, roleName: '学生', roleCode: 'student', description: '学生角色', createTime: '2024-01-01 00:00:00' },
+                        { id: 4, roleName: '科技处评审人员', roleCode: 'tech_reviewer', description: '科技处课题评审人员', createTime: '2024-01-01 00:00:00' },
+                        { id: 5, roleName: '教务处人员', roleCode: 'edu_staff', description: '教务处工作人员', createTime: '2024-01-01 00:00:00' },
+                        { id: 6, roleName: '学生管理处人员', roleCode: 'student_affairs', description: '学生管理处工作人员', createTime: '2024-01-01 00:00:00' },
+                        { id: 7, roleName: '班主任', roleCode: 'class_teacher', description: '班级班主任', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    showRoleDialog: false,
+                    isEditRole: false,
+                    roleForm: {
+                        id: '',
+                        roleName: '',
+                        roleCode: '',
+                        description: ''
+                    },
+                    permissionList: [
+                        { id: 1, permissionName: '用户管理', permissionCode: 'user:manage', description: '用户管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, permissionName: '角色管理', permissionCode: 'role:manage', description: '角色管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, permissionName: '权限管理', permissionCode: 'permission:manage', description: '权限管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 4, permissionName: '课程管理', permissionCode: 'course:manage', description: '课程管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 5, permissionName: '学生管理', permissionCode: 'student:manage', description: '学生管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 6, permissionName: '实习管理', permissionCode: 'internship:manage', description: '实习管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 7, permissionName: '异常学生管理', permissionCode: 'abnormal:manage', description: '异常学生管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 8, permissionName: '科研管理', permissionCode: 'research:manage', description: '科研管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 9, permissionName: '课程标准管理', permissionCode: 'courseStandard:manage', description: '课程标准管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 10, permissionName: '请假申请', permissionCode: 'leave:apply', description: '请假申请权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 11, permissionName: '学分申请', permissionCode: 'credit:apply', description: '学分申请权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 12, permissionName: '课程查询', permissionCode: 'course:query', description: '课程查询权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 13, permissionName: '成绩查询', permissionCode: 'score:query', description: '成绩查询权限', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    showPermissionDialog: false,
+                    isEditPermission: false,
+                    permissionForm: {
+                        id: '',
+                        permissionName: '',
+                        permissionCode: '',
+                        description: ''
+                    },
+                    // 教师相关
+                    teacherTab: 'course',
+                    courseList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', credits: 4.0, hours: 64, teacher: '张老师', semester: '第一学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', credits: 3.0, hours: 48, teacher: '李老师', semester: '第一学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', credits: 2.0, hours: 32, teacher: '王老师', semester: '第二学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    showCourseDialog: false,
+                    isEditCourse: false,
+                    courseForm: {
+                        id: '',
+                        courseName: '',
+                        courseCode: '',
+                        credits: 0,
+                        hours: 0,
+                        teacher: '',
+                        semester: '',
+                        year: ''
+                    },
+                    studentList: [
+                        { id: 1, studentId: '2024001', name: '李同学', gender: '男', className: '计算机1班', major: '计算机科学与技术' },
+                        { id: 2, studentId: '2024002', name: '王同学', gender: '女', className: '计算机1班', major: '计算机科学与技术' },
+                        { id: 3, studentId: '2024003', name: '张同学', gender: '男', className: '计算机1班', major: '计算机科学与技术' }
+                    ],
+                    internshipList: [
+                        { id: 1, studentName: '李同学', company: '腾讯科技', startDate: '2024-07-01', endDate: '2024-08-31', status: '已提交', materials: [] },
+                        { id: 2, studentName: '王同学', company: '阿里巴巴', startDate: '2024-07-01', endDate: '2024-08-31', status: '待审核', materials: [] },
+                        { id: 3, studentName: '张同学', company: '百度', startDate: '2024-07-01', endDate: '2024-08-31', status: '已通过', materials: [] }
+                    ],
+                    // 学生相关
+                    studentTab: 'course',
+                    scoreList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', usualScore: 85, finalScore: 90, totalScore: 88, semester: '第一学期', year: '2024-2025' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', usualScore: 80, finalScore: 85, totalScore: 83, semester: '第一学期', year: '2024-2025' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', usualScore: 90, finalScore: 95, totalScore: 93, semester: '第二学期', year: '2024-2025' }
+                    ],
+                    // 科技处相关
+                    techDeptTab: 'research',
+                    researchList: [
+                        { id: 1, title: '人工智能在教育中的应用', applicant: '张老师', applyDate: '2024-01-01', status: '待评审', materials: [] },
+                        { id: 2, title: '大数据分析在校园管理中的应用', applicant: '李老师', applyDate: '2024-01-02', status: '评审中', materials: [] },
+                        { id: 3, title: '物联网技术在智慧校园中的应用', applicant: '王老师', applyDate: '2024-01-03', status: '已通过', materials: [] }
+                    ],
+                    // 教务处相关
+                    eduDeptTab: 'course',
+                    // 学生管理处相关
+                    studentAffairsTab: 'abnormal',
+                    abnormalList: [
+                        { id: 1, studentName: '李同学', className: '计算机1班', type: '迟到', submitDate: '2024-01-01', status: '待审核', materials: [] },
+                        { id: 2, studentName: '王同学', className: '计算机1班', type: '旷课', submitDate: '2024-01-02', status: '审核中', materials: [] },
+                        { id: 3, studentName: '张同学', className: '计算机1班', type: '违纪', submitDate: '2024-01-03', status: '已处理', materials: [] }
+                    ]
+                };
+            },
+            methods: {
+                generateCaptcha() {
+                    this.captcha.num1 = Math.floor(Math.random() * 10);
+                    this.captcha.num2 = Math.floor(Math.random() * 10);
+                    this.captcha.operator = Math.random() > 0.5 ? '+' : '-';
+                    if (this.captcha.operator === '+') {
+                        this.captcha.result = this.captcha.num1 + this.captcha.num2;
+                    } else {
+                        if (this.captcha.num1 < this.captcha.num2) {
+                            [this.captcha.num1, this.captcha.num2] = [this.captcha.num2, this.captcha.num1];
+                        }
+                        this.captcha.result = this.captcha.num1 - this.captcha.num2;
+                    }
+                },
+                validateCaptcha() {
+                    return parseInt(this.loginForm.verifyCode) === this.captcha.result;
+                },
+                login() {
+                    if (!this.validateCaptcha()) {
+                        alert('验证码错误');
+                        this.generateCaptcha();
+                        return;
+                    }
+                    if (this.loginForm.username === 'admin' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 1,
+                            username: 'admin',
+                            name: '管理员',
+                            type: 0,
+                            status: 1
+                        };
+                        this.currentPage = 'admin';
+                    } else if (this.loginForm.username === 'teacher' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 2,
+                            username: 'teacher',
+                            name: '张老师',
+                            type: 1,
+                            status: 1
+                        };
+                        this.currentPage = 'teacher';
+                    } else if (this.loginForm.username === 'student' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 3,
+                            username: 'student',
+                            name: '李同学',
+                            type: 2,
+                            status: 1
+                        };
+                        this.currentPage = 'student';
+                    } else if (this.loginForm.username === 'tech_dept' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 4,
+                            username: 'tech_dept',
+                            name: '科技处人员',
+                            type: 3,
+                            status: 1
+                        };
+                        this.currentPage = 'techDept';
+                    } else if (this.loginForm.username === 'edu_dept' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 5,
+                            username: 'edu_dept',
+                            name: '教务处人员',
+                            type: 4,
+                            status: 1
+                        };
+                        this.currentPage = 'eduDept';
+                    } else if (this.loginForm.username === 'student_affairs' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 6,
+                            username: 'student_affairs',
+                            name: '学生管理处人员',
+                            type: 5,
+                            status: 1
+                        };
+                        this.currentPage = 'studentAffairs';
+                    } else {
+                        alert('用户名或密码错误');
+                    }
+                },
+                logout() {
+                    this.currentPage = 'login';
+                    this.user = null;
+                },
+                // 用户管理
+                addUser() {
+                    this.isEditUser = false;
+                    this.userForm = {
+                        id: '',
+                        username: '',
+                        password: '',
+                        name: '',
+                        type: 0,
+                        status: 1
+                    };
+                    this.showUserDialog = true;
+                },
+                editUser(user) {
+                    this.isEditUser = true;
+                    this.userForm = { ...user };
+                    this.showUserDialog = true;
+                },
+                saveUser() {
+                    if (this.isEditUser) {
+                        const index = this.userList.findIndex(u => u.id === this.userForm.id);
+                        if (index !== -1) {
+                            this.userList[index] = { ...this.userForm };
+                        }
+                    } else {
+                        const newUser = {
+                            id: this.userList.length + 1,
+                            ...this.userForm,
+                            createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                        };
+                        this.userList.push(newUser);
+                    }
+                    this.showUserDialog = false;
+                },
+                deleteUser(id) {
+                    if (confirm('确定要删除这个用户吗？')) {
+                        this.userList = this.userList.filter(u => u.id !== id);
+                    }
+                },
+                // 角色管理
+                addRole() {
+                    this.isEditRole = false;
+                    this.roleForm = {
+                        id: '',
+                        roleName: '',
+                        roleCode: '',
+                        description: ''
+                    };
+                    this.showRoleDialog = true;
+                },
+                editRole(role) {
+                    this.isEditRole = true;
+                    this.roleForm = { ...role };
+                    this.showRoleDialog = true;
+                },
+                saveRole() {
+                    if (this.isEditRole) {
+                        const index = this.roleList.findIndex(r => r.id === this.roleForm.id);
+                        if (index !== -1) {
+                            this.roleList[index] = { ...this.roleForm };
+                        }
+                    } else {
+                        const newRole = {
+                            id: this.roleList.length + 1,
+                            ...this.roleForm,
+                            createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                        };
+                        this.roleList.push(newRole);
+                    }
+                    this.showRoleDialog = false;
+                },
+                deleteRole(id) {
+                    if (confirm('确定要删除这个角色吗？')) {
+                        this.roleList = this.roleList.filter(r => r.id !== id);
+                    }
+                },
+                // 权限管理
+                addPermission() {
+                    this.isEditPermission = false;
+                    this.permissionForm = {
+                        id: '',
+                        permissionName: '',
+                        permissionCode: '',
+                        description: ''
+                    };
+                    this.showPermissionDialog = true;
+                },
+                editPermission(permission) {
+                    this.isEditPermission = true;
+                    this.permissionForm = { ...permission };
+                    this.showPermissionDialog = true;
+                },
+                savePermission() {
+                    if (this.isEditPermission) {
+                        const index = this.permissionList.findIndex(p => p.id === this.permissionForm.id);
+                        if (index !== -1) {
+                            this.permissionList[index] = { ...this.permissionForm };
+                        }
+                    } else {
+                        const newPermission = {
+                            id: this.permissionList.length + 1,
+                            ...this.permissionForm,
+                            createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                        };
+                        this.permissionList.push(newPermission);
+                    }
+                    this.showPermissionDialog = false;
+                },
+                deletePermission(id) {
+                    if (confirm('确定要删除这个权限吗？')) {
+                        this.permissionList = this.permissionList.filter(p => p.id !== id);
+                    }
+                },
+                // 课程管理
+                addCourse() {
+                    this.isEditCourse = false;
+                    this.courseForm = {
+                        id: '',
+                        courseName: '',
+                        courseCode: '',
+                        credits: 0,
+                        hours: 0,
+                        teacher: '',
+                        semester: '',
+                        year: ''
+                    };
+                    this.showCourseDialog = true;
+                },
+                editCourse(course) {
+                    this.isEditCourse = true;
+                    this.courseForm = { ...course };
+                    this.showCourseDialog = true;
+                },
+                saveCourse() {
+                    if (this.isEditCourse) {
+                        const index = this.courseList.findIndex(c => c.id === this.courseForm.id);
+                        if (index !== -1) {
+                            this.courseList[index] = { ...this.courseForm };
+                        }
+                    } else {
+                        const newCourse = {
+                            id: this.courseList.length + 1,
+                            ...this.courseForm,
+                            createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                        };
+                        this.courseList.push(newCourse);
+                    }
+                    this.showCourseDialog = false;
+                },
+                deleteCourse(id) {
+                    if (confirm('确定要删除这个课程吗？')) {
+                        this.courseList = this.courseList.filter(c => c.id !== id);
+                    }
+                },
+                // 实习管理
+                reviewInternship(internship) {
+                    alert('审核实习材料');
+                },
+                // 科研管理
+                reviewResearch(research) {
+                    alert('评审科研课题');
+                },
+                // 异常学生管理
+                reviewAbnormal(abnormal) {
+                    alert('审核异常学生材料');
+                }
+            },
+            mounted() {
+                this.generateCaptcha();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

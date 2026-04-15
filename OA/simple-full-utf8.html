@@ -1,0 +1,3319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园OA系统</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+        .login-form {
+            width: 420px;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1a2a6c;
+            font-weight: 700;
+            font-size: 24px;
+        }
+        .form-item {
+            margin-bottom: 24px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .captcha-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .captcha-input {
+            flex: 2;
+            height: 48px;
+        }
+        .captcha-code {
+            display: flex;
+            align-items: center;
+            background-color: #f0f2f5;
+            padding: 0 12px;
+            border-radius: 8px;
+            height: 48px;
+            flex: 1;
+            font-weight: 500;
+        }
+        .captcha-refresh {
+            padding: 0 12px;
+            height: 48px;
+            font-size: 12px;
+            flex: 0.5;
+        }
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .checkbox-label input {
+            margin-right: 8px;
+            accent-color: #667eea;
+        }
+        .forgot-password {
+            font-size: 14px;
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .forgot-password:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .login-divider {
+            margin: 24px 0;
+            text-align: center;
+            position: relative;
+        }
+        .login-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #e2e8f0;
+        }
+        .login-divider span {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 0 16px;
+            position: relative;
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        .qr-login {
+            display: flex;
+            justify-content: center;
+        }
+        .qr-code {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+        }
+        .qr-code img {
+            width: 140px;
+            height: 140px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+        }
+        .qr-code p {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+        .btn-close:hover {
+            color: #333;
+        }
+        .container {
+            padding: 30px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 30px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            color: #1a2a6c;
+            font-weight: 700;
+            font-size: 24px;
+        }
+        .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            width: 240px;
+            background-color: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            margin-bottom: 8px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #4a5568;
+            display: block;
+            padding: 12px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .sidebar a:hover {
+            background-color: #f0f4ff;
+            color: #667eea;
+            transform: translateX(4px);
+        }
+        .main {
+            flex: 1;
+            margin-left: 30px;
+        }
+        .flex {
+            display: flex;
+        }
+        .tab-content {
+            margin-top: 24px;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .tab-button:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        table th, table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .dialog-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 16px;
+            width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: dialogSlideIn 0.3s ease;
+        }
+        @keyframes dialogSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .dialog-header h3 {
+            color: #1a2a6c;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .dialog-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+            gap: 12px;
+        }
+        .dialog-footer button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .dialog-footer button:first-child {
+            background-color: #f8f9fa;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+        .dialog-footer button:first-child:hover {
+            background-color: #e2e8f0;
+        }
+        .dialog-footer button:last-child {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        .dialog-footer button:last-child:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+        }
+        /* 学籍信息样式 */
+        .student-info-card {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .info-item {
+            flex: 1;
+            min-width: 300px;
+            margin-right: 20px;
+        }
+        .info-item.full-width {
+            flex: 100%;
+            margin-right: 0;
+        }
+        .info-item label {
+            display: inline-block;
+            width: 100px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        .info-item span {
+            color: #333;
+            font-size: 14px;
+        }
+        /* 角色权限分配样式 */
+        .permission-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        .permission-item {
+            margin-bottom: 10px;
+        }
+        .permission-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        /* 后勤服务样式 */
+        .logistics-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+        /* 消息通知样式 */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .notification {
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-icon {
+            font-size: 20px;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff4d4f;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notification-dropdown {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            width: 300px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .notification-header h4 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .btn-mark-read {
+            font-size: 12px;
+            color: #667eea;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .notification-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .notification-item.unread {
+            background-color: #f7f7f7;
+        }
+        .notification-content {
+            flex: 1;
+        }
+        .notification-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .notification-message {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .notification-time {
+            font-size: 11px;
+            color: #999;
+        }
+        .btn-read {
+            font-size: 12px;
+            color: #667eea;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        /* 注册链接样式 */
+        .register-link {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            margin-left: 5px;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        /* 登录链接样式 */
+        .login-link {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            margin-left: 5px;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        /* 数据统计样式 */
+        .statistics-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .stat-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #667eea;
+        }
+        .chart-container {
+            margin-bottom: 30px;
+        }
+        .chart-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .chart-card h4 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .chart-placeholder {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .chart-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            color: white;
+            font-size: 12px;
+            transition: height 0.5s ease;
+        }
+        .export-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .export-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .export-section button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div v-if="currentPage === 'login'" class="login-container">
+            <div class="login-form">
+                <h2>校园OA系统</h2>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="loginForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="loginForm.password" class="form-input" placeholder="请输入密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">验证码</label>
+                    <div class="captcha-container">
+                        <input type="text" v-model="loginForm.verifyCode" class="form-input captcha-input" placeholder="请输入验证码">
+                        <div class="captcha-code">
+                            {{ captcha.num1 }} {{ captcha.operator }} {{ captcha.num2 }} = ?
+                        </div>
+                        <button class="btn-primary captcha-refresh" @click="generateCaptcha">刷新</button>
+                    </div>
+                </div>
+                <div class="form-item form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" v-model="loginForm.remember"> 记住密码
+                    </label>
+                    <a href="#" @click="showForgotPasswordDialog = true" class="forgot-password">忘记密码？</a>
+                </div>
+                <button class="btn-primary" @click="login">登录</button>
+                <div class="login-divider">
+                    <span>其他登录方式</span>
+                </div>
+                <div class="qr-login">
+                    <div class="qr-code">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=QR%20code%20for%20campus%20OA%20system%20login&image_size=square" alt="扫码登录">
+                        <p>请使用校园APP扫码登录</p>
+                    </div>
+                </div>
+                <div class="register-link">
+                    <span>还没有账号？</span>
+                    <a href="#" @click="currentPage = 'register'">立即注册</a>
+                </div>
+            </div>
+        </div>
+        <div v-else-if="currentPage === 'register'" class="login-container">
+            <div class="login-form">
+                <h2>用户注册</h2>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="registerForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="registerForm.password" class="form-input" placeholder="请输入密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" v-model="registerForm.confirmPassword" class="form-input" placeholder="请确认密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">姓名</label>
+                    <input type="text" v-model="registerForm.name" class="form-input" placeholder="请输入姓名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">角色类型</label>
+                    <select v-model="registerForm.type" class="form-input">
+                        <option value="2">学生</option>
+                        <option value="1">教师</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">验证码</label>
+                    <div class="captcha-container">
+                        <input type="text" v-model="registerForm.verifyCode" class="form-input captcha-input" placeholder="请输入验证码">
+                        <div class="captcha-code">
+                            {{ captcha.num1 }} {{ captcha.operator }} {{ captcha.num2 }} = ?
+                        </div>
+                        <button class="btn-primary captcha-refresh" @click="generateCaptcha">刷新</button>
+                    </div>
+                </div>
+                <button class="btn-primary" @click="register">注册</button>
+                <div class="login-link">
+                    <span>已有账号？</span>
+                    <a href="#" @click="currentPage = 'login'">立即登录</a>
+                </div>
+            </div>
+        </div>
+        <div v-else class="container">
+            <div class="header">
+                <h1>校园OA系统</h1>
+                <div class="header-right">
+                    <div class="notification" @click="toggleNotification">
+                        <span class="notification-icon">🔔</span>
+                        <span v-if="unreadNotifications > 0" class="notification-badge">{{ unreadNotifications }}</span>
+                        <div v-if="showNotification" class="notification-dropdown">
+                            <div class="notification-header">
+                                <h4>消息通知</h4>
+                                <button @click="markAllAsRead" class="btn-mark-read">全部已读</button>
+                            </div>
+                            <div class="notification-list">
+                                <div v-for="notification in notificationList" :key="notification.id" class="notification-item" :class="{ unread: !notification.read }">
+                                    <div class="notification-content">
+                                        <div class="notification-title">{{ notification.title }}</div>
+                                        <div class="notification-message">{{ notification.message }}</div>
+                                        <div class="notification-time">{{ notification.time }}</div>
+                                    </div>
+                                    <button @click="markAsRead(notification.id)" class="btn-read">已读</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <span>{{ user.name }}</span>
+                    <button class="btn-primary" @click="logout" style="margin-left: 10px; padding: 6px 12px;">退出</button>
+                </div>
+            </div>
+            <div class="flex">
+                <div class="sidebar">
+                    <ul>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'user'">用户管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'role'">角色管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'permission'">权限管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'statistics'">数据统计</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'course'">课程管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'student'">学生管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'internship'">实习管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'research'">科研管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'courseStandard'">课程标准评审</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'lessonPlan'">教案审核</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'leave'">请假管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'credit'">学分管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'abnormal'">异常学生管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'substitute'">调代课管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'course'">课程查询</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'score'">成绩查询</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'internship'">实习管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'leave'">请假管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'credit'">学分管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'studentInfo'">学籍信息</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'rewardPunishment'">奖惩申请</a></li>
+                        <li v-if="user.type === 3"><a @click="techDeptTab = 'research'">科研管理</a></li>
+                        <li v-if="user.type === 4"><a @click="eduDeptTab = 'course'">课程管理</a></li>
+                        <li v-if="user.type === 4"><a @click="eduDeptTab = 'score'">成绩管理</a></li>
+                        <li v-if="user.type === 4"><a @click="eduDeptTab = 'credit'">学分管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'excellent'">评优评先</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'scholarship'">奖助学金</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'logistics'">后勤服务</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'excellent'">评优评先</a></li>
+                        <li v-if="user.type === 4"><a @click="eduDeptTab = 'courseStandard'">课程标准评审</a></li>
+                        <li v-if="user.type === 5"><a @click="studentAffairsTab = 'abnormal'">异常学生管理</a></li>
+                        <li v-if="user.type === 5"><a @click="studentAffairsTab = 'scholarship'">奖助学金管理</a></li>
+                    </ul>
+                </div>
+                <div class="main">
+                    <!-- 管理员页面 -->
+                    <div v-if="user.type === 0">
+                        <div v-if="adminTab === 'user'">
+                            <h2>用户管理</h2>
+                            <button class="btn-primary" @click="addUser" style="margin-bottom: 20px;">添加用户</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>用户名</th>
+                                        <th>姓名</th>
+                                        <th>类型</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="user in userList" :key="user.id">
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.type === 0 ? '管理员' : user.type === 1 ? '教师' : user.type === 2 ? '学生' : user.type === 3 ? '科技处' : user.type === 4 ? '教务处' : '学生管理处' }}</td>
+                                        <td>{{ user.status === 1 ? '启用' : '禁用' }}</td>
+                                        <td>{{ user.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editUser(user)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteUser(user.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="adminTab === 'role'">
+                            <h2>角色管理</h2>
+                            <button class="btn-primary" @click="addRole" style="margin-bottom: 20px;">添加角色</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>角色名称</th>
+                                        <th>角色代码</th>
+                                        <th>描述</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="role in roleList" :key="role.id">
+                                        <td>{{ role.id }}</td>
+                                        <td>{{ role.roleName }}</td>
+                                        <td>{{ role.roleCode }}</td>
+                                        <td>{{ role.description }}</td>
+                                        <td>{{ role.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editRole(role)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteRole(role.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="adminTab === 'permission'">
+                            <h2>权限管理</h2>
+                            <button class="btn-primary" @click="addPermission" style="margin-bottom: 20px;">添加权限</button>
+                            <button class="btn-primary" @click="showRolePermissionDialog = true" style="margin-bottom: 20px; margin-left: 10px;">角色权限分配</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>权限名称</th>
+                                        <th>权限代码</th>
+                                        <th>描述</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="permission in permissionList" :key="permission.id">
+                                        <td>{{ permission.id }}</td>
+                                        <td>{{ permission.permissionName }}</td>
+                                        <td>{{ permission.permissionCode }}</td>
+                                        <td>{{ permission.description }}</td>
+                                        <td>{{ permission.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editPermission(permission)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deletePermission(permission.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="adminTab === 'statistics'">
+                            <h2>数据统计</h2>
+                            <div class="statistics-container">
+                                <div class="stat-card">
+                                    <div class="stat-title">用户总数</div>
+                                    <div class="stat-value">{{ statistics.userCount }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-title">学生总数</div>
+                                    <div class="stat-value">{{ statistics.studentCount }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-title">教师总数</div>
+                                    <div class="stat-value">{{ statistics.teacherCount }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-title">行政人员总数</div>
+                                    <div class="stat-value">{{ statistics.adminCount }}</div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <h3>业务数据统计</h3>
+                                <div class="chart-card">
+                                    <h4>实习申请状态分布</h4>
+                                    <div class="chart-placeholder">
+                                        <div class="chart-bar">
+                                            <div class="bar" style="height: 80%; background-color: #667eea;"><span>已通过: 80%</span></div>
+                                        </div>
+                                        <div class="chart-bar">
+                                            <div class="bar" style="height: 15%; background-color: #f6ad55;"><span>待审核: 15%</span></div>
+                                        </div>
+                                        <div class="chart-bar">
+                                            <div class="bar" style="height: 5%; background-color: #fc8181;"><span>已驳回: 5%</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart-card">
+                                    <h4>请假类型分布</h4>
+                                    <div class="chart-placeholder">
+                                        <div class="chart-bar">
+                                            <div class="bar" style="height: 60%; background-color: #667eea;"><span>病假: 60%</span></div>
+                                        </div>
+                                        <div class="chart-bar">
+                                            <div class="bar" style="height: 30%; background-color: #f6ad55;"><span>事假: 30%</span></div>
+                                        </div>
+                                        <div class="chart-bar">
+                                            <div class="bar" style="height: 10%; background-color: #48bb78;"><span>其他: 10%</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="export-section">
+                                <h3>数据导出</h3>
+                                <button class="btn-primary" @click="exportData('user')">导出用户数据</button>
+                                <button class="btn-primary" @click="exportData('student')">导出学生数据</button>
+                                <button class="btn-primary" @click="exportData('internship')">导出实习数据</button>
+                                <button class="btn-primary" @click="exportData('leave')">导出请假数据</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 教师页面 -->
+                    <div v-else-if="user.type === 1">
+                        <div v-if="teacherTab === 'course'">
+                            <h2>课程管理</h2>
+                            <button class="btn-primary" @click="addCourse" style="margin-bottom: 20px;">添加课程</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editCourse(course)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteCourse(course.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'student'">
+                            <h2>学生管理</h2>
+                            <button class="btn-primary" @click="addClassStudent" style="margin-bottom: 20px;">添加学生</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学号</th>
+                                        <th>姓名</th>
+                                        <th>性别</th>
+                                        <th>班级</th>
+                                        <th>专业</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="student in studentList" :key="student.id">
+                                        <td>{{ student.id }}</td>
+                                        <td>{{ student.studentId }}</td>
+                                        <td>{{ student.name }}</td>
+                                        <td>{{ student.gender }}</td>
+                                        <td>{{ student.className }}</td>
+                                        <td>{{ student.major }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editClassStudent(student)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteClassStudent(student.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'internship'">
+                            <h2>实习管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学生姓名</th>
+                                        <th>实习单位</th>
+                                        <th>实习时间</th>
+                                        <th>提交状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="internship in internshipList" :key="internship.id">
+                                        <td>{{ internship.id }}</td>
+                                        <td>{{ internship.studentName }}</td>
+                                        <td>{{ internship.company }}</td>
+                                        <td>{{ internship.startDate }} 至 {{ internship.endDate }}</td>
+                                        <td>{{ internship.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewInternship(internship)" style="padding: 4px 8px; font-size: 12px;">审核</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'research'">
+                            <h2>科研管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课题名称</th>
+                                        <th>申报人</th>
+                                        <th>申报时间</th>
+                                        <th>预算</th>
+                                        <th>持续时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="research in researchList" :key="research.id">
+                                        <td>{{ research.id }}</td>
+                                        <td>{{ research.title }}</td>
+                                        <td>{{ research.applicant }}</td>
+                                        <td>{{ research.applyDate }}</td>
+                                        <td>{{ research.budget }}</td>
+                                        <td>{{ research.duration }}</td>
+                                        <td>{{ research.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewResearch(research)" style="padding: 4px 8px; font-size: 12px;">评审</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'courseStandard'">
+                            <h2>课程标准评审</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>教师</th>
+                                        <th>提交时间</th>
+                                        <th>版本</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="courseStandard in courseStandardList" :key="courseStandard.id">
+                                        <td>{{ courseStandard.id }}</td>
+                                        <td>{{ courseStandard.courseName }}</td>
+                                        <td>{{ courseStandard.courseCode }}</td>
+                                        <td>{{ courseStandard.teacher }}</td>
+                                        <td>{{ courseStandard.submitDate }}</td>
+                                        <td>{{ courseStandard.version }}</td>
+                                        <td>{{ courseStandard.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewCourseStandard(courseStandard)" style="padding: 4px 8px; font-size: 12px;">评审</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'lessonPlan'">
+                            <h2>教案审核</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>教师</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="lessonPlan in lessonPlanList" :key="lessonPlan.id">
+                                        <td>{{ lessonPlan.id }}</td>
+                                        <td>{{ lessonPlan.courseName }}</td>
+                                        <td>{{ lessonPlan.courseCode }}</td>
+                                        <td>{{ lessonPlan.teacher }}</td>
+                                        <td>{{ lessonPlan.submitDate }}</td>
+                                        <td>{{ lessonPlan.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewLessonPlan(lessonPlan)" style="padding: 4px 8px; font-size: 12px;">审核</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'leave'">
+                            <h2>请假管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学生姓名</th>
+                                        <th>学号</th>
+                                        <th>请假类型</th>
+                                        <th>开始日期</th>
+                                        <th>结束日期</th>
+                                        <th>请假原因</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="leave in leaveList" :key="leave.id">
+                                        <td>{{ leave.id }}</td>
+                                        <td>{{ leave.studentName }}</td>
+                                        <td>{{ leave.studentId }}</td>
+                                        <td>{{ leave.type }}</td>
+                                        <td>{{ leave.startDate }}</td>
+                                        <td>{{ leave.endDate }}</td>
+                                        <td>{{ leave.reason }}</td>
+                                        <td>{{ leave.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewLeave(leave)" style="padding: 4px 8px; font-size: 12px;">审核</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'credit'">
+                            <h2>学分管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学生姓名</th>
+                                        <th>学号</th>
+                                        <th>学分类型</th>
+                                        <th>申请学分</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="credit in creditList" :key="credit.id">
+                                        <td>{{ credit.id }}</td>
+                                        <td>{{ credit.studentName }}</td>
+                                        <td>{{ credit.studentId }}</td>
+                                        <td>{{ credit.type }}</td>
+                                        <td>{{ credit.credits }}</td>
+                                        <td>{{ credit.submitDate }}</td>
+                                        <td>{{ credit.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewCredit(credit)" style="padding: 4px 8px; font-size: 12px;">审核</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'abnormal'">
+                            <h2>异常学生管理</h2>
+                            <button class="btn-primary" @click="showAddAbnormalStudentDialog = true" style="margin-bottom: 20px;">添加异常学生</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学生姓名</th>
+                                        <th>学号</th>
+                                        <th>异常类型</th>
+                                        <th>异常描述</th>
+                                        <th>记录时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="student in abnormalStudentList" :key="student.id">
+                                        <td>{{ student.id }}</td>
+                                        <td>{{ student.studentName }}</td>
+                                        <td>{{ student.studentId }}</td>
+                                        <td>{{ student.abnormalType }}</td>
+                                        <td>{{ student.description }}</td>
+                                        <td>{{ student.recordDate }}</td>
+                                        <td>{{ student.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editAbnormalStudent(student)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteAbnormalStudent(student.id)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">删除</button>
+                                            <button class="btn-primary" @click="submitToStudentAffairs(student)" style="padding: 4px 8px; font-size: 12px;">提交学生处</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'substitute'">
+                            <h2>调代课管理</h2>
+                            <button class="btn-primary" @click="showApplySubstituteDialog = true" style="margin-bottom: 20px;">申请调代课</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>调课日期</th>
+                                        <th>调课原因</th>
+                                        <th>代课教师</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="substitute in substituteList" :key="substitute.id">
+                                        <td>{{ substitute.id }}</td>
+                                        <td>{{ substitute.courseName }}</td>
+                                        <td>{{ substitute.substituteDate }}</td>
+                                        <td>{{ substitute.reason }}</td>
+                                        <td>{{ substitute.substituteTeacher }}</td>
+                                        <td>{{ substitute.submitDate }}</td>
+                                        <td>{{ substitute.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editSubstitute(substitute)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteSubstitute(substitute.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'excellent'">
+                            <h2>评优评先管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>申请人</th>
+                                        <th>评优类型</th>
+                                        <th>申请理由</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="excellent in excellentList" :key="excellent.id">
+                                        <td>{{ excellent.id }}</td>
+                                        <td>{{ excellent.applicant }}</td>
+                                        <td>{{ excellent.type }}</td>
+                                        <td>{{ excellent.reason }}</td>
+                                        <td>{{ excellent.submitDate }}</td>
+                                        <td>{{ excellent.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewExcellent(excellent)" style="padding: 4px 8px; font-size: 12px;">审核</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 学生页面 -->
+                    <div v-else-if="user.type === 2">
+                        <div v-if="studentTab === 'course'">
+                            <h2>课程查询</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'score'">
+                            <h2>成绩查询</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>平时成绩</th>
+                                        <th>期末成绩</th>
+                                        <th>总评成绩</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="score in scoreList" :key="score.id">
+                                        <td>{{ score.id }}</td>
+                                        <td>{{ score.courseName }}</td>
+                                        <td>{{ score.courseCode }}</td>
+                                        <td>{{ score.usualScore }}</td>
+                                        <td>{{ score.finalScore }}</td>
+                                        <td>{{ score.totalScore }}</td>
+                                        <td>{{ score.semester }}</td>
+                                        <td>{{ score.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'internship'">
+                            <h2>实习管理</h2>
+                            <button class="btn-primary" @click="showApplyInternshipDialog = true" style="margin-bottom: 20px;">申请实习</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>实习单位</th>
+                                        <th>实习时间</th>
+                                        <th>提交状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="internship in studentInternshipList" :key="internship.id">
+                                        <td>{{ internship.id }}</td>
+                                        <td>{{ internship.company }}</td>
+                                        <td>{{ internship.startDate }} 至 {{ internship.endDate }}</td>
+                                        <td>{{ internship.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editInternship(internship)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteInternship(internship.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'leave'">
+                            <h2>请假管理</h2>
+                            <button class="btn-primary" @click="showApplyLeaveDialog = true" style="margin-bottom: 20px;">申请请假</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>请假类型</th>
+                                        <th>开始日期</th>
+                                        <th>结束日期</th>
+                                        <th>请假原因</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="leave in studentLeaveList" :key="leave.id">
+                                        <td>{{ leave.id }}</td>
+                                        <td>{{ leave.type }}</td>
+                                        <td>{{ leave.startDate }}</td>
+                                        <td>{{ leave.endDate }}</td>
+                                        <td>{{ leave.reason }}</td>
+                                        <td>{{ leave.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editLeave(leave)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteLeave(leave.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'credit'">
+                            <h2>学分管理</h2>
+                            <button class="btn-primary" @click="showApplyCreditDialog = true" style="margin-bottom: 20px;">申请学分</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学分类型</th>
+                                        <th>申请学分</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="credit in studentCreditList" :key="credit.id">
+                                        <td>{{ credit.id }}</td>
+                                        <td>{{ credit.type }}</td>
+                                        <td>{{ credit.credits }}</td>
+                                        <td>{{ credit.submitDate }}</td>
+                                        <td>{{ credit.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editCredit(credit)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteCredit(credit.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'studentInfo'">
+                            <h2>学籍信息</h2>
+                            <div class="student-info-card">
+                                <div class="info-row">
+                                    <div class="info-item">
+                                        <label>姓名：</label>
+                                        <span>{{ studentInfo.name }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>学号：</label>
+                                        <span>{{ studentInfo.studentId }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-item">
+                                        <label>性别：</label>
+                                        <span>{{ studentInfo.gender }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>出生日期：</label>
+                                        <span>{{ studentInfo.birthDate }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-item">
+                                        <label>学院：</label>
+                                        <span>{{ studentInfo.college }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>专业：</label>
+                                        <span>{{ studentInfo.major }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-item">
+                                        <label>班级：</label>
+                                        <span>{{ studentInfo.className }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>入学时间：</label>
+                                        <span>{{ studentInfo.enrollmentDate }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-item">
+                                        <label>学籍状态：</label>
+                                        <span>{{ studentInfo.status }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>预计毕业时间：</label>
+                                        <span>{{ studentInfo.expectedGraduationDate }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-item full-width">
+                                        <label>联系电话：</label>
+                                        <span>{{ studentInfo.phone }}</span>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-item full-width">
+                                        <label>电子邮箱：</label>
+                                        <span>{{ studentInfo.email }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else-if="studentTab === 'rewardPunishment'">
+                            <h2>奖惩申请</h2>
+                            <button class="btn-primary" @click="showApplyRewardPunishmentDialog = true" style="margin-bottom: 20px;">申请奖惩</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>申请类型</th>
+                                        <th>奖惩类型</th>
+                                        <th>申请时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item in rewardPunishmentList" :key="item.id">
+                                        <td>{{ item.id }}</td>
+                                        <td>{{ item.applicationType }}</td>
+                                        <td>{{ item.type }}</td>
+                                        <td>{{ item.applyDate }}</td>
+                                        <td>{{ item.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editRewardPunishment(item)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteRewardPunishment(item.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'excellent'">
+                            <h2>评优评先</h2>
+                            <button class="btn-primary" @click="showApplyExcellentDialog = true" style="margin-bottom: 20px;">申请评优评先</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>评优类型</th>
+                                        <th>申请理由</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="excellent in studentExcellentList" :key="excellent.id">
+                                        <td>{{ excellent.id }}</td>
+                                        <td>{{ excellent.type }}</td>
+                                        <td>{{ excellent.reason }}</td>
+                                        <td>{{ excellent.submitDate }}</td>
+                                        <td>{{ excellent.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editStudentExcellent(excellent)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteStudentExcellent(excellent.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'scholarship'">
+                            <h2>奖助学金</h2>
+                            <button class="btn-primary" @click="showApplyScholarshipDialog = true" style="margin-bottom: 20px;">申请奖助学金</button>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>奖助学金类型</th>
+                                        <th>申请理由</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="scholarship in studentScholarshipList" :key="scholarship.id">
+                                        <td>{{ scholarship.id }}</td>
+                                        <td>{{ scholarship.type }}</td>
+                                        <td>{{ scholarship.reason }}</td>
+                                        <td>{{ scholarship.submitDate }}</td>
+                                        <td>{{ scholarship.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="editStudentScholarship(scholarship)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" @click="deleteStudentScholarship(scholarship.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'logistics'">
+                            <h2>后勤服务</h2>
+                            <div class="logistics-tabs">
+                                <button class="tab-btn" :class="{ active: logisticsTab === 'repair' }" @click="logisticsTab = 'repair'">校园报修</button>
+                                <button class="tab-btn" :class="{ active: logisticsTab === 'venue' }" @click="logisticsTab = 'venue'">场地申请</button>
+                            </div>
+                            <div v-if="logisticsTab === 'repair'">
+                                <button class="btn-primary" @click="showApplyRepairDialog = true" style="margin-bottom: 20px;">提交报修</button>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>报修类型</th>
+                                            <th>报修地点</th>
+                                            <th>报修内容</th>
+                                            <th>提交时间</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="repair in repairList" :key="repair.id">
+                                            <td>{{ repair.id }}</td>
+                                            <td>{{ repair.type }}</td>
+                                            <td>{{ repair.location }}</td>
+                                            <td>{{ repair.content }}</td>
+                                            <td>{{ repair.submitDate }}</td>
+                                            <td>{{ repair.status }}</td>
+                                            <td>
+                                                <button class="btn-primary" @click="editRepair(repair)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                                <button class="btn-primary" @click="deleteRepair(repair.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div v-else-if="logisticsTab === 'venue'">
+                                <button class="btn-primary" @click="showApplyVenueDialog = true" style="margin-bottom: 20px;">申请场地</button>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>场地名称</th>
+                                            <th>使用时间</th>
+                                            <th>使用原因</th>
+                                            <th>提交时间</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="venue in venueList" :key="venue.id">
+                                            <td>{{ venue.id }}</td>
+                                            <td>{{ venue.name }}</td>
+                                            <td>{{ venue.useTime }}</td>
+                                            <td>{{ venue.reason }}</td>
+                                            <td>{{ venue.submitDate }}</td>
+                                            <td>{{ venue.status }}</td>
+                                            <td>
+                                                <button class="btn-primary" @click="editVenue(venue)" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                                <button class="btn-primary" @click="deleteVenue(venue.id)" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 科技处页面 -->
+                    <div v-else-if="user.type === 3">
+                        <div v-if="techDeptTab === 'research'">
+                            <h2>科研管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课题名称</th>
+                                        <th>申报人</th>
+                                        <th>申报时间</th>
+                                        <th>预算</th>
+                                        <th>持续时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="research in researchList" :key="research.id">
+                                        <td>{{ research.id }}</td>
+                                        <td>{{ research.title }}</td>
+                                        <td>{{ research.applicant }}</td>
+                                        <td>{{ research.applyDate }}</td>
+                                        <td>{{ research.budget }}</td>
+                                        <td>{{ research.duration }}</td>
+                                        <td>{{ research.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewResearch(research)" style="padding: 4px 8px; font-size: 12px;">评审</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 教务处页面 -->
+                    <div v-else-if="user.type === 4">
+                        <div v-if="eduDeptTab === 'course'">
+                            <h2>课程管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="eduDeptTab === 'courseStandard'">
+                            <h2>课程标准评审</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>教师</th>
+                                        <th>提交时间</th>
+                                        <th>版本</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="courseStandard in courseStandardList" :key="courseStandard.id">
+                                        <td>{{ courseStandard.id }}</td>
+                                        <td>{{ courseStandard.courseName }}</td>
+                                        <td>{{ courseStandard.courseCode }}</td>
+                                        <td>{{ courseStandard.teacher }}</td>
+                                        <td>{{ courseStandard.submitDate }}</td>
+                                        <td>{{ courseStandard.version }}</td>
+                                        <td>{{ courseStandard.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewCourseStandard(courseStandard)" style="padding: 4px 8px; font-size: 12px;">评审</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 学生管理处页面 -->
+                    <div v-else-if="user.type === 5">
+                        <div v-if="studentAffairsTab === 'abnormal'">
+                            <h2>异常学生管理</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学生姓名</th>
+                                        <th>班级</th>
+                                        <th>异常类型</th>
+                                        <th>提交时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="abnormal in abnormalList" :key="abnormal.id">
+                                        <td>{{ abnormal.id }}</td>
+                                        <td>{{ abnormal.studentName }}</td>
+                                        <td>{{ abnormal.className }}</td>
+                                        <td>{{ abnormal.type }}</td>
+                                        <td>{{ abnormal.submitDate }}</td>
+                                        <td>{{ abnormal.status }}</td>
+                                        <td>
+                                            <button class="btn-primary" @click="reviewAbnormal(abnormal)" style="padding: 4px 8px; font-size: 12px;">审核</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 用户编辑对话框 -->
+        <div v-if="showUserDialog" class="dialog">
+            <div class="dialog-content">
+                <div class="dialog-header">
+                    <h3>{{ isEditUser ? '编辑用户' : '添加用户' }}</h3>
+                    <button @click="showUserDialog = false">×</button>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="userForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="userForm.password" class="form-input" placeholder="请输入密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">姓名</label>
+                    <input type="text" v-model="userForm.name" class="form-input" placeholder="请输入姓名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">类型</label>
+                    <select v-model="userForm.type" class="form-input">
+                        <option value="0">管理员</option>
+                        <option value="1">教师</option>
+                        <option value="2">学生</option>
+                        <option value="3">科技处</option>
+                        <option value="4">教务处</option>
+                        <option value="5">学生管理处</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">状态</label>
+                    <select v-model="userForm.status" class="form-input">
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-primary" style="margin-right: 10px;" @click="showUserDialog = false">取消</button>
+                    <button class="btn-primary" @click="saveUser">保存</button>
+                </div>
+            </div>
+        </div>
+        <!-- 忘记密码对话框 -->
+        <div v-if="showForgotPasswordDialog" class="dialog">
+            <div class="dialog-content">
+                <div class="dialog-header">
+                    <h3>忘记密码</h3>
+                    <button class="btn-close" @click="showForgotPasswordDialog = false">&times;</button>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="forgotPasswordForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">验证码</label>
+                    <div class="captcha-container">
+                        <input type="text" v-model="forgotPasswordForm.verifyCode" class="form-input captcha-input" placeholder="请输入验证码">
+                        <button class="btn-primary captcha-refresh" @click="sendVerificationCode">发送验证码</button>
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">新密码</label>
+                    <input type="password" v-model="forgotPasswordForm.newPassword" class="form-input" placeholder="请输入新密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">确认新密码</label>
+                    <input type="password" v-model="forgotPasswordForm.confirmPassword" class="form-input" placeholder="请确认新密码">
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-primary" style="margin-right: 10px;" @click="showForgotPasswordDialog = false">取消</button>
+                    <button class="btn-primary" @click="resetPassword">重置密码</button>
+                </div>
+            </div>
+        </div>
+        <!-- 班主任学生管理对话框 -->
+        <div v-if="showClassStudentDialog" class="dialog">
+            <div class="dialog-content">
+                <div class="dialog-header">
+                    <h3>{{ isEditClassStudent ? '编辑学生' : '添加学生' }}</h3>
+                    <button class="btn-close" @click="showClassStudentDialog = false">&times;</button>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">学号</label>
+                    <input type="text" v-model="classStudentForm.studentId" class="form-input" placeholder="请输入学号">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">姓名</label>
+                    <input type="text" v-model="classStudentForm.name" class="form-input" placeholder="请输入姓名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">性别</label>
+                    <select v-model="classStudentForm.gender" class="form-input">
+                        <option value="">请选择</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">班级</label>
+                    <input type="text" v-model="classStudentForm.className" class="form-input" placeholder="请输入班级">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">专业</label>
+                    <input type="text" v-model="classStudentForm.major" class="form-input" placeholder="请输入专业">
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-primary" style="margin-right: 10px;" @click="showClassStudentDialog = false">取消</button>
+                    <button class="btn-primary" @click="saveClassStudent">保存</button>
+                </div>
+            </div>
+            <!-- 学生实习申请对话框 -->
+            <div v-if="showApplyInternshipDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>申请实习</h3>
+                        <button class="btn-close" @click="showApplyInternshipDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">实习单位</label>
+                        <input type="text" v-model="internshipForm.company" class="form-input" placeholder="请输入实习单位">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">开始日期</label>
+                        <input type="date" v-model="internshipForm.startDate" class="form-input">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">结束日期</label>
+                        <input type="date" v-model="internshipForm.endDate" class="form-input">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">实习内容</label>
+                        <textarea v-model="internshipForm.content" class="form-input" rows="3" placeholder="请输入实习内容"></textarea>
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplyInternshipDialog = false">取消</button>
+                        <button @click="applyInternship">提交申请</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 学生请假申请对话框 -->
+            <div v-if="showApplyLeaveDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>申请请假</h3>
+                        <button class="btn-close" @click="showApplyLeaveDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">请假类型</label>
+                        <select v-model="leaveForm.type" class="form-input">
+                            <option value="事假">事假</option>
+                            <option value="病假">病假</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">开始日期</label>
+                        <input type="date" v-model="leaveForm.startDate" class="form-input">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">结束日期</label>
+                        <input type="date" v-model="leaveForm.endDate" class="form-input">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">请假原因</label>
+                        <textarea v-model="leaveForm.reason" class="form-input" rows="3" placeholder="请输入请假原因"></textarea>
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplyLeaveDialog = false">取消</button>
+                        <button @click="applyLeave">提交申请</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 学生学分申请对话框 -->
+            <div v-if="showApplyCreditDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>申请学分</h3>
+                        <button class="btn-close" @click="showApplyCreditDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">学分类型</label>
+                        <select v-model="creditForm.type" class="form-input">
+                            <option value="竞赛获奖">竞赛获奖</option>
+                            <option value="论文发表">论文发表</option>
+                            <option value="社会实践">社会实践</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">申请学分</label>
+                        <input type="number" v-model="creditForm.credits" class="form-input" placeholder="请输入申请学分" step="0.5">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">申请原因</label>
+                        <textarea v-model="creditForm.reason" class="form-input" rows="3" placeholder="请输入申请原因"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">上传材料</label>
+                        <input type="file" class="form-input">
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplyCreditDialog = false">取消</button>
+                        <button @click="applyCredit">提交申请</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 学生奖惩申请对话框 -->
+            <div v-if="showApplyRewardPunishmentDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>申请奖惩</h3>
+                        <button class="btn-close" @click="showApplyRewardPunishmentDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">申请类型</label>
+                        <select v-model="rewardPunishmentForm.applicationType" class="form-input">
+                            <option value="奖励申请">奖励申请</option>
+                            <option value="惩罚申请">惩罚申请</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">奖惩类型</label>
+                        <select v-model="rewardPunishmentForm.type" class="form-input">
+                            <option value="优秀学生">优秀学生</option>
+                            <option value="优秀学生干部">优秀学生干部</option>
+                            <option value="奖学金">奖学金</option>
+                            <option value="其他奖励">其他奖励</option>
+                            <option value="警告">警告</option>
+                            <option value="严重警告">严重警告</option>
+                            <option value="记过">记过</option>
+                            <option value="其他惩罚">其他惩罚</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">申请原因</label>
+                        <textarea v-model="rewardPunishmentForm.reason" class="form-input" rows="3" placeholder="请输入申请原因"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">相关时间</label>
+                        <input type="date" v-model="rewardPunishmentForm.relatedDate" class="form-input">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">上传材料</label>
+                        <input type="file" class="form-input">
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplyRewardPunishmentDialog = false">取消</button>
+                        <button @click="applyRewardPunishment">提交申请</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 异常学生管理对话框 -->
+            <div v-if="showAddAbnormalStudentDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>{{ isEditAbnormalStudent ? '编辑异常学生' : '添加异常学生' }}</h3>
+                        <button class="btn-close" @click="showAddAbnormalStudentDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">学生姓名</label>
+                        <input type="text" v-model="abnormalStudentForm.studentName" class="form-input" placeholder="请输入学生姓名">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">学号</label>
+                        <input type="text" v-model="abnormalStudentForm.studentId" class="form-input" placeholder="请输入学号">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">异常类型</label>
+                        <select v-model="abnormalStudentForm.abnormalType" class="form-input">
+                            <option value="迟到旷课">迟到旷课</option>
+                            <option value="违反纪律">违反纪律</option>
+                            <option value="成绩异常">成绩异常</option>
+                            <option value="其他异常">其他异常</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">异常描述</label>
+                        <textarea v-model="abnormalStudentForm.description" class="form-input" rows="3" placeholder="请输入异常描述"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">记录时间</label>
+                        <input type="date" v-model="abnormalStudentForm.recordDate" class="form-input">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">上传材料</label>
+                        <input type="file" class="form-input">
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showAddAbnormalStudentDialog = false">取消</button>
+                        <button @click="saveAbnormalStudent">保存</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 角色权限分配对话框 -->
+            <div v-if="showRolePermissionDialog" class="dialog" style="width: 600px;">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>角色权限分配</h3>
+                        <button class="btn-close" @click="showRolePermissionDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">选择角色</label>
+                        <select v-model="selectedRoleId" class="form-input">
+                            <option v-for="role in roleList" :key="role.id" :value="role.id">{{ role.roleName }}</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">分配权限</label>
+                        <div class="permission-list">
+                            <div v-for="permission in permissionList" :key="permission.id" class="permission-item">
+                                <input type="checkbox" :id="'permission-' + permission.id" :value="permission.id" v-model="selectedPermissions">
+                                <label :for="'permission-' + permission.id">{{ permission.permissionName }} ({{ permission.permissionCode }})</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showRolePermissionDialog = false">取消</button>
+                        <button @click="saveRolePermissions">保存</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 校园报修对话框 -->
+            <div v-if="showApplyRepairDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>{{ isEditRepair ? '编辑报修' : '提交报修' }}</h3>
+                        <button class="btn-close" @click="showApplyRepairDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">报修类型</label>
+                        <select v-model="repairForm.type" class="form-input">
+                            <option value="水电维修">水电维修</option>
+                            <option value="教室维修">教室维修</option>
+                            <option value="卫生检查">卫生检查</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">报修地点</label>
+                        <input type="text" v-model="repairForm.location" class="form-input" placeholder="请输入报修地点">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">报修内容</label>
+                        <textarea v-model="repairForm.content" class="form-input" rows="3" placeholder="请输入报修内容"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系电话</label>
+                        <input type="tel" v-model="repairForm.phone" class="form-input" placeholder="请输入联系电话">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">上传图片</label>
+                        <input type="file" class="form-input">
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplyRepairDialog = false">取消</button>
+                        <button @click="applyRepair">提交</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 场地申请对话框 -->
+            <div v-if="showApplyVenueDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>{{ isEditVenue ? '编辑场地申请' : '申请场地' }}</h3>
+                        <button class="btn-close" @click="showApplyVenueDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">场地名称</label>
+                        <select v-model="venueForm.name" class="form-input">
+                            <option value="教室">教室</option>
+                            <option value="会议室">会议室</option>
+                            <option value="活动中心">活动中心</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">使用时间</label>
+                        <input type="datetime-local" v-model="venueForm.useTime" class="form-input">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">使用原因</label>
+                        <textarea v-model="venueForm.reason" class="form-input" rows="3" placeholder="请输入使用原因"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系电话</label>
+                        <input type="tel" v-model="venueForm.phone" class="form-input" placeholder="请输入联系电话">
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplyVenueDialog = false">取消</button>
+                        <button @click="applyVenue">提交</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 调代课申请对话框 -->
+            <div v-if="showApplySubstituteDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>{{ isEditSubstitute ? '编辑调代课申请' : '申请调代课' }}</h3>
+                        <button class="btn-close" @click="showApplySubstituteDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">课程名称</label>
+                        <select v-model="substituteForm.courseName" class="form-input">
+                            <option value="高等数学">高等数学</option>
+                            <option value="大学物理">大学物理</option>
+                            <option value="计算机基础">计算机基础</option>
+                            <option value="英语">英语</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">调课日期</label>
+                        <input type="date" v-model="substituteForm.substituteDate" class="form-input">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">调课原因</label>
+                        <textarea v-model="substituteForm.reason" class="form-input" rows="3" placeholder="请输入调课原因"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">代课教师</label>
+                        <input type="text" v-model="substituteForm.substituteTeacher" class="form-input" placeholder="请输入代课教师姓名">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系电话</label>
+                        <input type="tel" v-model="substituteForm.phone" class="form-input" placeholder="请输入联系电话">
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplySubstituteDialog = false">取消</button>
+                        <button @click="applySubstitute">提交</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 评优评先申请对话框 -->
+            <div v-if="showApplyExcellentDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>{{ isEditExcellent ? '编辑评优评先申请' : '申请评优评先' }}</h3>
+                        <button class="btn-close" @click="showApplyExcellentDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">评优类型</label>
+                        <select v-model="excellentForm.type" class="form-input">
+                            <option value="优秀学生">优秀学生</option>
+                            <option value="优秀班干部">优秀班干部</option>
+                            <option value="优秀团员">优秀团员</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">申请理由</label>
+                        <textarea v-model="excellentForm.reason" class="form-input" rows="3" placeholder="请输入申请理由"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系电话</label>
+                        <input type="tel" v-model="excellentForm.phone" class="form-input" placeholder="请输入联系电话">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">上传证明材料</label>
+                        <input type="file" class="form-input">
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplyExcellentDialog = false">取消</button>
+                        <button @click="applyExcellent">提交</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 评优评先审核对话框 -->
+            <div v-if="showReviewExcellentDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>评优评先审核</h3>
+                        <button class="btn-close" @click="showReviewExcellentDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">申请人</label>
+                        <input type="text" v-model="reviewExcellentForm.applicant" class="form-input" disabled>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">评优类型</label>
+                        <input type="text" v-model="reviewExcellentForm.type" class="form-input" disabled>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">申请理由</label>
+                        <textarea v-model="reviewExcellentForm.reason" class="form-input" rows="3" disabled></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">审核结果</label>
+                        <select v-model="reviewExcellentForm.result" class="form-input">
+                            <option value="通过">通过</option>
+                            <option value="驳回">驳回</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">审核意见</label>
+                        <textarea v-model="reviewExcellentForm.opinion" class="form-input" rows="3" placeholder="请输入审核意见"></textarea>
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showReviewExcellentDialog = false">取消</button>
+                        <button @click="saveReviewExcellent">保存</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 奖助学金申请对话框 -->
+            <div v-if="showApplyScholarshipDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>{{ isEditScholarship ? '编辑奖助学金申请' : '申请奖助学金' }}</h3>
+                        <button class="btn-close" @click="showApplyScholarshipDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">奖助学金类型</label>
+                        <select v-model="scholarshipForm.type" class="form-input">
+                            <option value="国家奖学金">国家奖学金</option>
+                            <option value="国家励志奖学金">国家励志奖学金</option>
+                            <option value="国家助学金">国家助学金</option>
+                            <option value="其他奖学金">其他奖学金</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">申请理由</label>
+                        <textarea v-model="scholarshipForm.reason" class="form-input" rows="3" placeholder="请输入申请理由"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系电话</label>
+                        <input type="tel" v-model="scholarshipForm.phone" class="form-input" placeholder="请输入联系电话">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">上传证明材料</label>
+                        <input type="file" class="form-input">
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showApplyScholarshipDialog = false">取消</button>
+                        <button @click="applyScholarship">提交</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 注册对话框 -->
+            <div v-if="showRegisterDialog" class="dialog">
+                <div class="dialog-content">
+                    <div class="dialog-header">
+                        <h3>用户注册</h3>
+                        <button class="btn-close" @click="showRegisterDialog = false">&times;</button>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">用户名</label>
+                        <input type="text" v-model="registerForm.username" class="form-input" placeholder="请输入用户名">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">密码</label>
+                        <input type="password" v-model="registerForm.password" class="form-input" placeholder="请输入密码">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">确认密码</label>
+                        <input type="password" v-model="registerForm.confirmPassword" class="form-input" placeholder="请确认密码">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">姓名</label>
+                        <input type="text" v-model="registerForm.name" class="form-input" placeholder="请输入姓名">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">角色类型</label>
+                        <select v-model="registerForm.type" class="form-input">
+                            <option value="2">学生</option>
+                            <option value="1">教师</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">验证码</label>
+                        <div class="captcha-container">
+                            <input type="text" v-model="registerForm.verifyCode" class="form-input captcha-input" placeholder="请输入验证码">
+                            <div class="captcha-code">
+                                {{ captcha.num1 }} {{ captcha.operator }} {{ captcha.num2 }} = ?
+                            </div>
+                            <button class="btn-primary captcha-refresh" @click="generateCaptcha">刷新</button>
+                        </div>
+                    </div>
+                    <div class="dialog-footer">
+                        <button @click="showRegisterDialog = false">取消</button>
+                        <button @click="register">注册</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    currentPage: 'login',
+                    user: null,
+                    loginForm: {
+                        username: '',
+                        password: '',
+                        verifyCode: '',
+                        remember: false
+                    },
+                    showForgotPasswordDialog: false,
+                    forgotPasswordForm: {
+                        username: '',
+                        verifyCode: '',
+                        newPassword: '',
+                        confirmPassword: ''
+                    },
+                    showRegisterDialog: false,
+                    registerForm: {
+                        username: '',
+                        password: '',
+                        confirmPassword: '',
+                        name: '',
+                        type: 2, // 默认学生角色
+                        verifyCode: ''
+                    },
+                    captcha: {
+                        num1: 0,
+                        num2: 0,
+                        operator: '+',
+                        result: 0
+                    },
+                    // 管理员相关
+                    adminTab: 'user',
+                    userList: [
+                        { id: 1, username: 'admin', password: '123456', name: '管理员', type: 0, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 2, username: 'teacher', password: '123456', name: '张老师', type: 1, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 3, username: 'student', password: '123456', name: '李同学', type: 2, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 4, username: 'tech_dept', password: '123456', name: '科技处人员', type: 3, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 5, username: 'edu_dept', password: '123456', name: '教务处人员', type: 4, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 6, username: 'student_affairs', password: '123456', name: '学生管理处人员', type: 5, status: 1, createTime: '2024-01-01 00:00:00' }
+                    ],
+                    showUserDialog: false,
+                    isEditUser: false,
+                    userForm: {
+                        id: '',
+                        username: '',
+                        password: '',
+                        name: '',
+                        type: 0,
+                        status: 1
+                    },
+                    roleList: [
+                        { id: 1, roleName: '管理员', roleCode: 'admin', description: '系统管理员', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, roleName: '教师', roleCode: 'teacher', description: '教师角色', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, roleName: '学生', roleCode: 'student', description: '学生角色', createTime: '2024-01-01 00:00:00' },
+                        { id: 4, roleName: '科技处评审人员', roleCode: 'tech_reviewer', description: '科技处课题评审人员', createTime: '2024-01-01 00:00:00' },
+                        { id: 5, roleName: '教务处人员', roleCode: 'edu_staff', description: '教务处工作人员', createTime: '2024-01-01 00:00:00' },
+                        { id: 6, roleName: '学生管理处人员', roleCode: 'student_affairs', description: '学生管理处工作人员', createTime: '2024-01-01 00:00:00' },
+                        { id: 7, roleName: '班主任', roleCode: 'class_teacher', description: '班级班主任', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    showRoleDialog: false,
+                    isEditRole: false,
+                    roleForm: {
+                        id: '',
+                        roleName: '',
+                        roleCode: '',
+                        description: ''
+                    },
+                    permissionList: [
+                        { id: 1, permissionName: '用户管理', permissionCode: 'user:manage', description: '用户管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, permissionName: '角色管理', permissionCode: 'role:manage', description: '角色管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, permissionName: '权限管理', permissionCode: 'permission:manage', description: '权限管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 4, permissionName: '课程管理', permissionCode: 'course:manage', description: '课程管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 5, permissionName: '学生管理', permissionCode: 'student:manage', description: '学生管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 6, permissionName: '实习管理', permissionCode: 'internship:manage', description: '实习管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 7, permissionName: '异常学生管理', permissionCode: 'abnormal:manage', description: '异常学生管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 8, permissionName: '科研管理', permissionCode: 'research:manage', description: '科研管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 9, permissionName: '课程标准管理', permissionCode: 'courseStandard:manage', description: '课程标准管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 10, permissionName: '请假申请', permissionCode: 'leave:apply', description: '请假申请权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 11, permissionName: '学分申请', permissionCode: 'credit:apply', description: '学分申请权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 12, permissionName: '课程查询', permissionCode: 'course:query', description: '课程查询权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 13, permissionName: '成绩查询', permissionCode: 'score:query', description: '成绩查询权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 14, permissionName: '班主任管理', permissionCode: 'class_teacher:manage', description: '班主任管理权限', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    showPermissionDialog: false,
+                    isEditPermission: false,
+                    permissionForm: {
+                        id: '',
+                        permissionName: '',
+                        permissionCode: '',
+                        description: ''
+                    },
+                    // 教师相关
+                    teacherTab: 'course',
+                    courseList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', credits: 4.0, hours: 64, teacher: '张老师', semester: '第一学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', credits: 3.0, hours: 48, teacher: '李老师', semester: '第一学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', credits: 2.0, hours: 32, teacher: '王老师', semester: '第二学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    showCourseDialog: false,
+                    isEditCourse: false,
+                    courseForm: {
+                        id: '',
+                        courseName: '',
+                        courseCode: '',
+                        credits: 0,
+                        hours: 0,
+                        teacher: '',
+                        semester: '',
+                        year: ''
+                    },
+                    // 班主任学生管理
+                    showClassStudentDialog: false,
+                    isEditClassStudent: false,
+                    classStudentForm: {
+                        id: '',
+                        studentId: '',
+                        name: '',
+                        gender: '',
+                        className: '',
+                        major: ''
+                    },
+                    studentList: [
+                        { id: 1, studentId: '2024001', name: '李同学', gender: '男', className: '计算机1班', major: '计算机科学与技术' },
+                        { id: 2, studentId: '2024002', name: '王同学', gender: '女', className: '计算机1班', major: '计算机科学与技术' },
+                        { id: 3, studentId: '2024003', name: '张同学', gender: '男', className: '计算机1班', major: '计算机科学与技术' }
+                    ],
+                    internshipList: [
+                        { id: 1, studentName: '李同学', company: '腾讯科技', startDate: '2024-07-01', endDate: '2024-08-31', status: '已提交', materials: [] },
+                        { id: 2, studentName: '王同学', company: '阿里巴巴', startDate: '2024-07-01', endDate: '2024-08-31', status: '待审核', materials: [] },
+                        { id: 3, studentName: '张同学', company: '百度', startDate: '2024-07-01', endDate: '2024-08-31', status: '已通过', materials: [] }
+                    ],
+                    // 学生相关
+                    studentTab: 'course',
+                    // 学生相关
+                    scoreList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', usualScore: 85, finalScore: 90, totalScore: 88, semester: '第一学期', year: '2024-2025' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', usualScore: 90, finalScore: 85, totalScore: 88, semester: '第一学期', year: '2024-2025' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', usualScore: 90, finalScore: 95, totalScore: 93, semester: '第二学期', year: '2024-2025' }
+                    ],
+                    // 学生实习列表
+                    studentInternshipList: [
+                        { id: 1, company: 'ABC公司', startDate: '2024-07-01', endDate: '2024-08-31', status: '已提交' },
+                        { id: 2, company: 'XYZ科技', startDate: '2024-07-01', endDate: '2024-08-31', status: '待审核' }
+                    ],
+                    // 学生请假列表
+                    studentLeaveList: [
+                        { id: 1, type: '事假', startDate: '2024-01-01', endDate: '2024-01-03', reason: '家中有事', status: '已批准' },
+                        { id: 2, type: '病假', startDate: '2024-01-10', endDate: '2024-01-12', reason: '感冒发烧', status: '待审核' }
+                    ],
+                    // 学生学分列表
+                    studentCreditList: [
+                        { id: 1, type: '竞赛获奖', credits: 2.0, submitDate: '2024-01-01', status: '已批准' },
+                        { id: 2, type: '社会实践', credits: 1.0, submitDate: '2024-01-15', status: '待审核' }
+                    ],
+                    // 对话框状态
+                    showApplyInternshipDialog: false,
+                    showApplyLeaveDialog: false,
+                    showApplyCreditDialog: false,
+                    // 申请表单
+                    internshipForm: {
+                        company: '',
+                        startDate: '',
+                        endDate: '',
+                        content: ''
+                    },
+                    leaveForm: {
+                        type: '事假',
+                        startDate: '',
+                        endDate: '',
+                        reason: ''
+                    },
+                    creditForm: {
+                        type: '竞赛获奖',
+                        credits: '',
+                        reason: ''
+                    },
+                    // 学生学籍信息
+                    studentInfo: {
+                        name: '李同学',
+                        studentId: '2024001',
+                        gender: '男',
+                        birthDate: '2006-01-01',
+                        college: '计算机学院',
+                        major: '计算机科学与技术',
+                        className: '计科2024-1班',
+                        enrollmentDate: '2024-09-01',
+                        status: '在校',
+                        expectedGraduationDate: '2028-06-30',
+                        phone: '13800138000',
+                        email: 'student@example.com'
+                    },
+                    // 奖惩申请相关
+                    rewardPunishmentList: [
+                        { id: 1, applicationType: '奖励申请', type: '优秀学生', applyDate: '2024-01-01', status: '已批准' },
+                        { id: 2, applicationType: '奖励申请', type: '奖学金', applyDate: '2024-01-15', status: '待审核' }
+                    ],
+                    showApplyRewardPunishmentDialog: false,
+                    rewardPunishmentForm: {
+                        applicationType: '奖励申请',
+                        type: '优秀学生',
+                        reason: '',
+                        relatedDate: ''
+                    },
+                    // 异常学生管理相关
+                    abnormalStudentList: [
+                        { id: 1, studentName: '王同学', studentId: '2024002', abnormalType: '迟到旷课', description: '多次迟到', recordDate: '2024-01-01', status: '待处理' },
+                        { id: 2, studentName: '张同学', studentId: '2024003', abnormalType: '违反纪律', description: '扰乱课堂秩序', recordDate: '2024-01-10', status: '已提交学生处' }
+                    ],
+                    showAddAbnormalStudentDialog: false,
+                    isEditAbnormalStudent: false,
+                    abnormalStudentForm: {
+                        studentName: '',
+                        studentId: '',
+                        abnormalType: '迟到旷课',
+                        description: '',
+                        recordDate: ''
+                    },
+                    // 角色权限分配相关
+                    showRolePermissionDialog: false,
+                    selectedRoleId: '',
+                    selectedPermissions: [],
+                    // 后勤服务相关
+                    logisticsTab: 'repair',
+                    repairList: [
+                        { id: 1, type: '水电维修', location: '学生宿舍1栋', content: '水龙头漏水', submitDate: '2024-01-01', status: '已处理' },
+                        { id: 2, type: '教室维修', location: '教学楼301', content: '投影仪故障', submitDate: '2024-01-02', status: '处理中' }
+                    ],
+                    venueList: [
+                        { id: 1, name: '教室', useTime: '2024-01-10 14:00-16:00', reason: '班级活动', submitDate: '2024-01-05', status: '已批准' },
+                        { id: 2, name: '会议室', useTime: '2024-01-15 10:00-12:00', reason: '社团会议', submitDate: '2024-01-10', status: '待审核' }
+                    ],
+                    showApplyRepairDialog: false,
+                    showApplyVenueDialog: false,
+                    isEditRepair: false,
+                    isEditVenue: false,
+                    repairForm: {
+                        type: '水电维修',
+                        location: '',
+                        content: '',
+                        phone: ''
+                    },
+                    venueForm: {
+                        name: '教室',
+                        useTime: '',
+                        reason: '',
+                        phone: ''
+                    },
+                    // 调代课管理相关
+                    substituteList: [
+                        { id: 1, courseName: '高等数学', substituteDate: '2024-01-10', reason: '参加学术会议', substituteTeacher: '李老师', submitDate: '2024-01-05', status: '已批准' },
+                        { id: 2, courseName: '大学物理', substituteDate: '2024-01-15', reason: '生病请假', substituteTeacher: '王老师', submitDate: '2024-01-10', status: '待审核' }
+                    ],
+                    showApplySubstituteDialog: false,
+                    isEditSubstitute: false,
+                    substituteForm: {
+                        courseName: '高等数学',
+                        substituteDate: '',
+                        reason: '',
+                        substituteTeacher: '',
+                        phone: ''
+                    },
+                    // 评优评先管理相关
+                    studentExcellentList: [
+                        { id: 1, type: '优秀学生', reason: '学习成绩优异', submitDate: '2024-01-01', status: '待审核' },
+                        { id: 2, type: '优秀班干部', reason: '工作表现突出', submitDate: '2024-01-05', status: '已通过' }
+                    ],
+                    excellentList: [
+                        { id: 1, applicant: '张三', type: '优秀学生', reason: '学习成绩优异', submitDate: '2024-01-01', status: '待审核' },
+                        { id: 2, applicant: '李四', type: '优秀班干部', reason: '工作表现突出', submitDate: '2024-01-05', status: '待审核' }
+                    ],
+                    showApplyExcellentDialog: false,
+                    showReviewExcellentDialog: false,
+                    isEditExcellent: false,
+                    excellentForm: {
+                        type: '优秀学生',
+                        reason: '',
+                        phone: ''
+                    },
+                    reviewExcellentForm: {
+                        applicant: '',
+                        type: '',
+                        reason: '',
+                        result: '通过',
+                        opinion: ''
+                    },
+                    // 奖助学金管理相关
+                    studentScholarshipList: [
+                        { id: 1, type: '国家奖学金', reason: '学习成绩优异', submitDate: '2024-01-01', status: '待审核' },
+                        { id: 2, type: '国家助学金', reason: '家庭经济困难', submitDate: '2024-01-05', status: '已通过' }
+                    ],
+                    showApplyScholarshipDialog: false,
+                    isEditScholarship: false,
+                    scholarshipForm: {
+                        type: '国家奖学金',
+                        reason: '',
+                        phone: ''
+                    },
+                    // 消息通知相关
+                    showNotification: false,
+                    unreadNotifications: 2,
+                    notificationList: [
+                        { id: 1, title: '实习申请审核', message: '您的实习申请已通过审核', time: '2024-01-10 10:00', read: false },
+                        { id: 2, title: '请假审批', message: '您的请假申请已批准', time: '2024-01-09 14:30', read: false },
+                        { id: 3, title: '课程调整', message: '高等数学课程时间已调整', time: '2024-01-08 09:00', read: true }
+                    ],
+                    // 数据统计相关
+                    statistics: {
+                        userCount: 1500,
+                        studentCount: 1200,
+                        teacherCount: 200,
+                        adminCount: 100
+                    },
+                    // 科技处相关
+                    techDeptTab: 'research',
+                    researchList: [
+                        { id: 1, title: '人工智能在教育中的应用', applicant: '张老师', applyDate: '2024-01-01', status: '待评审', materials: [], budget: '10万元', duration: '1年' },
+                        { id: 2, title: '大数据分析在校园管理中的应用', applicant: '李老师', applyDate: '2024-01-02', status: '评审中', materials: [], budget: '15万元', duration: '1.5年' },
+                        { id: 3, title: '物联网技术在智慧校园中的应用', applicant: '王老师', applyDate: '2024-01-03', status: '已通过', materials: [], budget: '20万元', duration: '2年' },
+                        { id: 4, title: '区块链技术在学生管理中的应用', applicant: '刘老师', applyDate: '2024-01-04', status: '待评审', materials: [], budget: '12万元', duration: '1年' },
+                        { id: 5, title: '虚拟现实技术在教学中的应用', applicant: '陈老师', applyDate: '2024-01-05', status: '评审中', materials: [], budget: '18万元', duration: '1.5年' }
+                    ],
+                    // 课程标准评审
+                    courseStandardList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', teacher: '张老师', submitDate: '2024-01-01', status: '待评审', version: '1.0' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', teacher: '李老师', submitDate: '2024-01-02', status: '评审中', version: '1.0' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', teacher: '王老师', submitDate: '2024-01-03', status: '已通过', version: '1.0' },
+                        { id: 4, courseName: '数据结构', courseCode: 'COMP002', teacher: '刘老师', submitDate: '2024-01-04', status: '待评审', version: '1.0' },
+                        { id: 5, courseName: '操作系统', courseCode: 'COMP003', teacher: '陈老师', submitDate: '2024-01-05', status: '评审中', version: '1.0' }
+                    ],
+                    // 教案审核
+                    lessonPlanList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', teacher: '张老师', submitDate: '2024-01-01', status: '待审核' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', teacher: '李老师', submitDate: '2024-01-02', status: '审核中' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', teacher: '王老师', submitDate: '2024-01-03', status: '已通过' },
+                        { id: 4, courseName: '数据结构', courseCode: 'COMP002', teacher: '刘老师', submitDate: '2024-01-04', status: '待审核' },
+                        { id: 5, courseName: '操作系统', courseCode: 'COMP003', teacher: '陈老师', submitDate: '2024-01-05', status: '审核中' }
+                    ],
+                    // 请假管理
+                    leaveList: [
+                        { id: 1, studentName: '李同学', studentId: '2024001', type: '事假', startDate: '2024-01-01', endDate: '2024-01-03', reason: '家中有事', status: '待审核' },
+                        { id: 2, studentName: '王同学', studentId: '2024002', type: '病假', startDate: '2024-01-02', endDate: '2024-01-05', reason: '感冒发烧', status: '已批准' },
+                        { id: 3, studentName: '张同学', studentId: '2024003', type: '事假', startDate: '2024-01-03', endDate: '2024-01-04', reason: '参加比赛', status: '已驳回' },
+                        { id: 4, studentName: '刘同学', studentId: '2024004', type: '病假', startDate: '2024-01-04', endDate: '2024-01-06', reason: '急性肠胃炎', status: '待审核' },
+                        { id: 5, studentName: '陈同学', studentId: '2024005', type: '事假', startDate: '2024-01-05', endDate: '2024-01-07', reason: '家中急事', status: '已批准' }
+                    ],
+                    // 学分管理
+                    creditList: [
+                        { id: 1, studentName: '李同学', studentId: '2024001', type: '竞赛获奖', credits: 2.0, submitDate: '2024-01-01', status: '待审核', materials: [] },
+                        { id: 2, studentName: '王同学', studentId: '2024002', type: '论文发表', credits: 3.0, submitDate: '2024-01-02', status: '已批准', materials: [] },
+                        { id: 3, studentName: '张同学', studentId: '2024003', type: '社会实践', credits: 1.0, submitDate: '2024-01-03', status: '已驳回', materials: [] },
+                        { id: 4, studentName: '刘同学', studentId: '2024004', type: '竞赛获奖', credits: 2.0, submitDate: '2024-01-04', status: '待审核', materials: [] },
+                        { id: 5, studentName: '陈同学', studentId: '2024005', type: '论文发表', credits: 3.0, submitDate: '2024-01-05', status: '已批准', materials: [] }
+                    ],
+                    // 教务处相关
+                    eduDeptTab: 'course',
+                    // 学生管理处相关
+                    studentAffairsTab: 'abnormal',
+                    abnormalList: [
+                        { id: 1, studentName: '李同学', className: '计算机1班', type: '迟到', submitDate: '2024-01-01', status: '待审核', materials: [] },
+                        { id: 2, studentName: '王同学', className: '计算机1班', type: '旷课', submitDate: '2024-01-02', status: '审核中', materials: [] },
+                        { id: 3, studentName: '张同学', className: '计算机1班', type: '违纪', submitDate: '2024-01-03', status: '已处理', materials: [] }
+                    ]
+                };
+            },
+            methods: {
+                generateCaptcha() {
+                    this.captcha.num1 = Math.floor(Math.random() * 10);
+                    this.captcha.num2 = Math.floor(Math.random() * 10);
+                    this.captcha.operator = Math.random() > 0.5 ? '+' : '-';
+                    if (this.captcha.operator === '+') {
+                        this.captcha.result = this.captcha.num1 + this.captcha.num2;
+                    } else {
+                        if (this.captcha.num1 < this.captcha.num2) {
+                            [this.captcha.num1, this.captcha.num2] = [this.captcha.num2, this.captcha.num1];
+                        }
+                        this.captcha.result = this.captcha.num1 - this.captcha.num2;
+                    }
+                },
+                validateCaptcha() {
+                    return parseInt(this.loginForm.verifyCode) === this.captcha.result;
+                },
+                login() {
+                    if (!this.validateCaptcha()) {
+                        alert('验证码错误');
+                        this.generateCaptcha();
+                        return;
+                    }
+                    // 从用户列表中查找用户
+                    const user = this.userList.find(u => u.username === this.loginForm.username && u.password === this.loginForm.password);
+                    if (user) {
+                        this.user = user;
+                        // 根据用户类型设置当前页面
+                        switch (user.type) {
+                            case 0:
+                                this.currentPage = 'admin';
+                                break;
+                            case 1:
+                                this.currentPage = 'teacher';
+                                break;
+                            case 2:
+                                this.currentPage = 'student';
+                                break;
+                            case 3:
+                                this.currentPage = 'techDept';
+                                break;
+                            case 4:
+                                this.currentPage = 'eduDept';
+                                break;
+                            case 5:
+                                this.currentPage = 'studentAffairs';
+                                break;
+                            default:
+                                this.currentPage = 'student';
+                        }
+                        // 处理记住密码
+                        if (this.loginForm.remember) {
+                            localStorage.setItem('username', this.loginForm.username);
+                            localStorage.setItem('password', this.loginForm.password);
+                        } else {
+                            localStorage.removeItem('username');
+                            localStorage.removeItem('password');
+                        }
+                    } else {
+                        alert('用户名或密码错误');
+                        return;
+                    }
+                },
+                sendVerificationCode() {
+                    if (!this.forgotPasswordForm.username) {
+                        alert('请输入用户名');
+                        return;
+                    }
+                    alert('验证码已发送到您的邮箱/手机');
+                },
+                resetPassword() {
+                    if (!this.forgotPasswordForm.username) {
+                        alert('请输入用户名');
+                        return;
+                    }
+                    if (!this.forgotPasswordForm.verifyCode) {
+                        alert('请输入验证码');
+                        return;
+                    }
+                    if (!this.forgotPasswordForm.newPassword) {
+                        alert('请输入新密码');
+                        return;
+                    }
+                    if (this.forgotPasswordForm.newPassword !== this.forgotPasswordForm.confirmPassword) {
+                        alert('两次输入的密码不一致');
+                        return;
+                    }
+                    alert('密码重置成功，请使用新密码登录');
+                    this.showForgotPasswordDialog = false;
+                },
+                logout() {
+                    this.currentPage = 'login';
+                    this.user = null;
+                },
+                // 用户管理
+                addUser() {
+                    this.isEditUser = false;
+                    this.userForm = {
+                        id: '',
+                        username: '',
+                        password: '',
+                        name: '',
+                        type: 0,
+                        status: 1
+                    };
+                    this.showUserDialog = true;
+                },
+                editUser(user) {
+                    this.isEditUser = true;
+                    this.userForm = { ...user };
+                    this.showUserDialog = true;
+                },
+                saveUser() {
+                    if (this.isEditUser) {
+                        const index = this.userList.findIndex(u => u.id === this.userForm.id);
+                        if (index !== -1) {
+                            this.userList[index] = { ...this.userForm };
+                        }
+                    } else {
+                        const newUser = {
+                            id: this.userList.length + 1,
+                            ...this.userForm,
+                            createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                        };
+                        this.userList.push(newUser);
+                    }
+                    this.showUserDialog = false;
+                },
+                deleteUser(id) {
+                    if (confirm('确定要删除这个用户吗？')) {
+                        this.userList = this.userList.filter(u => u.id !== id);
+                    }
+                },
+                // 角色管理
+                addRole() {
+                    this.isEditRole = false;
+                    this.roleForm = {
+                        id: '',
+                        roleName: '',
+                        roleCode: '',
+                        description: ''
+                    };
+                    this.showRoleDialog = true;
+                },
+                editRole(role) {
+                    this.isEditRole = true;
+                    this.roleForm = { ...role };
+                    this.showRoleDialog = true;
+                },
+                saveRole() {
+                    if (this.isEditRole) {
+                        const index = this.roleList.findIndex(r => r.id === this.roleForm.id);
+                        if (index !== -1) {
+                            this.roleList[index] = { ...this.roleForm };
+                        }
+                    } else {
+                        const newRole = {
+                            id: this.roleList.length + 1,
+                            ...this.roleForm,
+                            createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                        };
+                        this.roleList.push(newRole);
+                    }
+                    this.showRoleDialog = false;
+                },
+                deleteRole(id) {
+                    if (confirm('确定要删除这个角色吗？')) {
+                        this.roleList = this.roleList.filter(r => r.id !== id);
+                    }
+                },
+                // 权限管理
+                addPermission() {
+                    this.isEditPermission = false;
+                    this.permissionForm = {
+                        id: '',
+                        permissionName: '',
+                        permissionCode: '',
+                        description: ''
+                    };
+                    this.showPermissionDialog = true;
+                },
+                editPermission(permission) {
+                    this.isEditPermission = true;
+                    this.permissionForm = { ...permission };
+                    this.showPermissionDialog = true;
+                },
+                savePermission() {
+                    if (this.isEditPermission) {
+                        const index = this.permissionList.findIndex(p => p.id === this.permissionForm.id);
+                        if (index !== -1) {
+                            this.permissionList[index] = { ...this.permissionForm };
+                        }
+                    } else {
+                        const newPermission = {
+                            id: this.permissionList.length + 1,
+                            ...this.permissionForm,
+                            createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                        };
+                        this.permissionList.push(newPermission);
+                    }
+                    this.showPermissionDialog = false;
+                },
+                deletePermission(id) {
+                    if (confirm('确定要删除这个权限吗？')) {
+                        this.permissionList = this.permissionList.filter(p => p.id !== id);
+                    }
+                },
+                // 课程管理
+                addCourse() {
+                    this.isEditCourse = false;
+                    this.courseForm = {
+                        id: '',
+                        courseName: '',
+                        courseCode: '',
+                        credits: 0,
+                        hours: 0,
+                        teacher: '',
+                        semester: '',
+                        year: ''
+                    };
+                    this.showCourseDialog = true;
+                },
+                editCourse(course) {
+                    this.isEditCourse = true;
+                    this.courseForm = { ...course };
+                    this.showCourseDialog = true;
+                },
+                saveCourse() {
+                    if (this.isEditCourse) {
+                        const index = this.courseList.findIndex(c => c.id === this.courseForm.id);
+                        if (index !== -1) {
+                            this.courseList[index] = { ...this.courseForm };
+                        }
+                    } else {
+                        const newCourse = {
+                            id: this.courseList.length + 1,
+                            ...this.courseForm,
+                            createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                        };
+                        this.courseList.push(newCourse);
+                    }
+                    this.showCourseDialog = false;
+                },
+                deleteCourse(id) {
+                    if (confirm('确定要删除这个课程吗？')) {
+                        this.courseList = this.courseList.filter(c => c.id !== id);
+                    }
+                },
+                // 实习管理
+                reviewInternship(internship) {
+                    alert('审核实习材料');
+                },
+                // 科研管理
+                reviewResearch(research) {
+                    alert('评审科研课题');
+                },
+                // 异常学生管理
+                reviewAbnormal(abnormal) {
+                    alert('审核异常学生材料');
+                },
+                // 课程标准评审
+                reviewCourseStandard(courseStandard) {
+                    alert('评审课程标准');
+                },
+                // 教案审核
+                reviewLessonPlan(lessonPlan) {
+                    alert('审核教案');
+                },
+                // 请假管理
+                reviewLeave(leave) {
+                    alert('审核请假申请');
+                },
+                // 学分管理
+                reviewCredit(credit) {
+                    alert('审核学分申请');
+                },
+                // 学生实习申请
+                showApplyInternshipDialog: false,
+                applyInternship() {
+                    alert('实习申请已提交');
+                    this.showApplyInternshipDialog = false;
+                },
+                editInternship(internship) {
+                    alert('编辑实习申请');
+                },
+                deleteInternship(id) {
+                    if (confirm('确定要删除该实习申请吗？')) {
+                        alert('实习申请已删除');
+                    }
+                },
+                // 学生请假申请
+                showApplyLeaveDialog: false,
+                applyLeave() {
+                    alert('请假申请已提交');
+                    this.showApplyLeaveDialog = false;
+                },
+                editLeave(leave) {
+                    alert('编辑请假申请');
+                },
+                deleteLeave(id) {
+                    if (confirm('确定要删除该请假申请吗？')) {
+                        alert('请假申请已删除');
+                    }
+                },
+                // 学生学分申请
+                showApplyCreditDialog: false,
+                applyCredit() {
+                    alert('学分申请已提交');
+                    this.showApplyCreditDialog = false;
+                },
+                editCredit(credit) {
+                    alert('编辑学分申请');
+                },
+                deleteCredit(id) {
+                    if (confirm('确定要删除该学分申请吗？')) {
+                        alert('学分申请已删除');
+                    }
+                },
+                // 学生奖惩申请
+                applyRewardPunishment() {
+                    alert('奖惩申请已提交');
+                    this.showApplyRewardPunishmentDialog = false;
+                },
+                editRewardPunishment(item) {
+                    alert('编辑奖惩申请');
+                },
+                deleteRewardPunishment(id) {
+                    if (confirm('确定要删除该奖惩申请吗？')) {
+                        alert('奖惩申请已删除');
+                    }
+                },
+                // 异常学生管理
+                addAbnormalStudent() {
+                    this.isEditAbnormalStudent = false;
+                    this.abnormalStudentForm = {
+                        studentName: '',
+                        studentId: '',
+                        abnormalType: '迟到旷课',
+                        description: '',
+                        recordDate: ''
+                    };
+                    this.showAddAbnormalStudentDialog = true;
+                },
+                editAbnormalStudent(student) {
+                    this.isEditAbnormalStudent = true;
+                    this.abnormalStudentForm = { ...student };
+                    this.showAddAbnormalStudentDialog = true;
+                },
+                saveAbnormalStudent() {
+                    alert(this.isEditAbnormalStudent ? '异常学生信息已更新' : '异常学生信息已添加');
+                    this.showAddAbnormalStudentDialog = false;
+                },
+                deleteAbnormalStudent(id) {
+                    if (confirm('确定要删除该异常学生记录吗？')) {
+                        alert('异常学生记录已删除');
+                    }
+                },
+                submitToStudentAffairs(student) {
+                    alert('已提交到学生处');
+                },
+                // 角色权限分配
+                saveRolePermissions() {
+                    alert('角色权限分配已保存');
+                    this.showRolePermissionDialog = false;
+                },
+                // 后勤服务
+                applyRepair() {
+                    alert('报修已提交');
+                    this.showApplyRepairDialog = false;
+                },
+                editRepair(repair) {
+                    this.isEditRepair = true;
+                    this.repairForm = { ...repair };
+                    this.showApplyRepairDialog = true;
+                },
+                deleteRepair(id) {
+                    if (confirm('确定要删除该报修记录吗？')) {
+                        alert('报修记录已删除');
+                    }
+                },
+                applyVenue() {
+                    alert('场地申请已提交');
+                    this.showApplyVenueDialog = false;
+                },
+                editVenue(venue) {
+                    this.isEditVenue = true;
+                    this.venueForm = { ...venue };
+                    this.showApplyVenueDialog = true;
+                },
+                deleteVenue(id) {
+                    if (confirm('确定要删除该场地申请吗？')) {
+                        alert('场地申请已删除');
+                    }
+                },
+                // 调代课管理
+                applySubstitute() {
+                    alert('调代课申请已提交');
+                    this.showApplySubstituteDialog = false;
+                },
+                editSubstitute(substitute) {
+                    this.isEditSubstitute = true;
+                    this.substituteForm = { ...substitute };
+                    this.showApplySubstituteDialog = true;
+                },
+                deleteSubstitute(id) {
+                    if (confirm('确定要删除该调代课申请吗？')) {
+                        alert('调代课申请已删除');
+                    }
+                },
+                // 评优评先管理
+                applyExcellent() {
+                    alert('评优评先申请已提交');
+                    this.showApplyExcellentDialog = false;
+                },
+                editStudentExcellent(excellent) {
+                    this.isEditExcellent = true;
+                    this.excellentForm = { ...excellent };
+                    this.showApplyExcellentDialog = true;
+                },
+                deleteStudentExcellent(id) {
+                    if (confirm('确定要删除该评优评先申请吗？')) {
+                        alert('评优评先申请已删除');
+                    }
+                },
+                reviewExcellent(excellent) {
+                    this.reviewExcellentForm = { ...excellent };
+                    this.showReviewExcellentDialog = true;
+                },
+                saveReviewExcellent() {
+                    alert('审核已完成');
+                    this.showReviewExcellentDialog = false;
+                },
+                // 奖助学金管理
+                applyScholarship() {
+                    alert('奖助学金申请已提交');
+                    this.showApplyScholarshipDialog = false;
+                },
+                editStudentScholarship(scholarship) {
+                    this.isEditScholarship = true;
+                    this.scholarshipForm = { ...scholarship };
+                    this.showApplyScholarshipDialog = true;
+                },
+                deleteStudentScholarship(id) {
+                    if (confirm('确定要删除该奖助学金申请吗？')) {
+                        alert('奖助学金申请已删除');
+                    }
+                },
+                // 消息通知相关
+                toggleNotification() {
+                    this.showNotification = !this.showNotification;
+                },
+                markAsRead(id) {
+                    const notification = this.notificationList.find(n => n.id === id);
+                    if (notification && !notification.read) {
+                        notification.read = true;
+                        this.unreadNotifications--;
+                    }
+                },
+                markAllAsRead() {
+                    this.notificationList.forEach(notification => {
+                        if (!notification.read) {
+                            notification.read = true;
+                        }
+                    });
+                    this.unreadNotifications = 0;
+                },
+                // 数据导出
+                exportData(type) {
+                    alert(`${type}数据导出成功`);
+                },
+                // 注册功能
+                register() {
+                    if (!this.registerForm.username || !this.registerForm.password || !this.registerForm.confirmPassword || !this.registerForm.name) {
+                        alert('请填写完整的注册信息');
+                        return;
+                    }
+                    if (this.registerForm.password !== this.registerForm.confirmPassword) {
+                        alert('两次输入的密码不一致');
+                        return;
+                    }
+                    if (parseInt(this.registerForm.verifyCode) !== this.captcha.result) {
+                        alert('验证码错误');
+                        return;
+                    }
+                    // 检查用户名是否已存在
+                    const existingUser = this.userList.find(user => user.username === this.registerForm.username);
+                    if (existingUser) {
+                        alert('用户名已存在');
+                        return;
+                    }
+                    // 创建新用户
+                    const newUser = {
+                        id: this.userList.length + 1,
+                        username: this.registerForm.username,
+                        password: this.registerForm.password,
+                        name: this.registerForm.name,
+                        type: parseInt(this.registerForm.type),
+                        status: 1,
+                        createTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                    };
+                    this.userList.push(newUser);
+                    alert('注册成功！');
+                    // 清空注册表单
+                    this.registerForm = {
+                        username: '',
+                        password: '',
+                        confirmPassword: '',
+                        name: '',
+                        type: 2,
+                        verifyCode: ''
+                    };
+                    // 跳转到登录页面
+                    this.currentPage = 'login';
+                },
+                // 班主任学生管理
+                addClassStudent() {
+                    this.isEditClassStudent = false;
+                    this.classStudentForm = {
+                        id: '',
+                        studentId: '',
+                        name: '',
+                        gender: '',
+                        className: '',
+                        major: ''
+                    };
+                    this.showClassStudentDialog = true;
+                },
+                editClassStudent(student) {
+                    this.isEditClassStudent = true;
+                    this.classStudentForm = { ...student };
+                    this.showClassStudentDialog = true;
+                },
+                saveClassStudent() {
+                    if (this.isEditClassStudent) {
+                        const index = this.studentList.findIndex(s => s.id === this.classStudentForm.id);
+                        if (index !== -1) {
+                            this.studentList[index] = { ...this.classStudentForm };
+                        }
+                    } else {
+                        const newStudent = {
+                            id: this.studentList.length + 1,
+                            ...this.classStudentForm
+                        };
+                        this.studentList.push(newStudent);
+                    }
+                    this.showClassStudentDialog = false;
+                },
+                deleteClassStudent(id) {
+                    if (confirm('确定要删除这个学生吗？')) {
+                        this.studentList = this.studentList.filter(s => s.id !== id);
+                    }
+                }
+            },
+            mounted() {
+                this.generateCaptcha();
+                // 检查是否有记住的密码
+                const savedUsername = localStorage.getItem('username');
+                const savedPassword = localStorage.getItem('password');
+                if (savedUsername && savedPassword) {
+                    this.loginForm.username = savedUsername;
+                    this.loginForm.password = savedPassword;
+                    this.loginForm.remember = true;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

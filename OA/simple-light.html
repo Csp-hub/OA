@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园OA系统</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-form {
+            width: 420px;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        .form-item {
+            margin-bottom: 24px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+        }
+        .container {
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .sidebar a:hover {
+            background-color: #e2e8f0;
+        }
+        .main {
+            flex: 1;
+            margin-left: 20px;
+        }
+        .flex {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div v-if="currentPage === 'login'" class="login-container">
+            <div class="login-form">
+                <h2>校园OA系统</h2>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="loginForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="loginForm.password" class="form-input" placeholder="请输入密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">验证码</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" v-model="loginForm.verifyCode" class="form-input" placeholder="请输入验证码" style="flex: 1;">
+                        <div style="display: flex; align-items: center; background-color: #f0f2f5; padding: 0 10px; border-radius: 4px;">
+                            {{ captcha.num1 }} {{ captcha.operator }} {{ captcha.num2 }} = ?
+                        </div>
+                        <button class="btn-primary" @click="generateCaptcha" style="padding: 0 12px;">刷新</button>
+                    </div>
+                </div>
+                <button class="btn-primary" @click="login">登录</button>
+            </div>
+        </div>
+        <div v-else class="container">
+            <div class="header">
+                <h1>校园OA系统</h1>
+                <div>
+                    <span>{{ user.name }}</span>
+                    <button class="btn-primary" @click="logout" style="margin-left: 10px; padding: 6px 12px;">退出</button>
+                </div>
+            </div>
+            <div class="flex">
+                <div class="sidebar">
+                    <ul>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'user'">用户管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'role'">角色管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'permission'">权限管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'course'">课程管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'student'">学生管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'course'">课程查询</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'score'">成绩查询</a></li>
+                    </ul>
+                </div>
+                <div class="main">
+                    <div v-if="user.type === 0">
+                        <div v-if="adminTab === 'user'">
+                            <h2>用户管理</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>用户名</th>
+                                        <th>姓名</th>
+                                        <th>类型</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="user in userList" :key="user.id">
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.type === 0 ? '管理员' : user.type === 1 ? '教师' : '学生' }}</td>
+                                        <td>{{ user.status === 1 ? '启用' : '禁用' }}</td>
+                                        <td>{{ user.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="adminTab === 'role'">
+                            <h2>角色管理</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>角色名称</th>
+                                        <th>角色代码</th>
+                                        <th>描述</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="role in roleList" :key="role.id">
+                                        <td>{{ role.id }}</td>
+                                        <td>{{ role.roleName }}</td>
+                                        <td>{{ role.roleCode }}</td>
+                                        <td>{{ role.description }}</td>
+                                        <td>{{ role.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="adminTab === 'permission'">
+                            <h2>权限管理</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>权限名称</th>
+                                        <th>权限代码</th>
+                                        <th>描述</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="permission in permissionList" :key="permission.id">
+                                        <td>{{ permission.id }}</td>
+                                        <td>{{ permission.permissionName }}</td>
+                                        <td>{{ permission.permissionCode }}</td>
+                                        <td>{{ permission.description }}</td>
+                                        <td>{{ permission.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div v-else-if="user.type === 1">
+                        <div v-if="teacherTab === 'course'">
+                            <h2>课程管理</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                        <td>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="teacherTab === 'student'">
+                            <h2>学生管理</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>学号</th>
+                                        <th>姓名</th>
+                                        <th>性别</th>
+                                        <th>班级</th>
+                                        <th>专业</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="student in studentList" :key="student.id">
+                                        <td>{{ student.id }}</td>
+                                        <td>{{ student.studentId }}</td>
+                                        <td>{{ student.name }}</td>
+                                        <td>{{ student.gender }}</td>
+                                        <td>{{ student.className }}</td>
+                                        <td>{{ student.major }}</td>
+                                        <td>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div v-else-if="user.type === 2">
+                        <div v-if="studentTab === 'course'">
+                            <h2>课程查询</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else-if="studentTab === 'score'">
+                            <h2>成绩查询</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>平时成绩</th>
+                                        <th>期末成绩</th>
+                                        <th>总评成绩</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="score in scoreList" :key="score.id">
+                                        <td>{{ score.id }}</td>
+                                        <td>{{ score.courseName }}</td>
+                                        <td>{{ score.courseCode }}</td>
+                                        <td>{{ score.usualScore }}</td>
+                                        <td>{{ score.finalScore }}</td>
+                                        <td>{{ score.totalScore }}</td>
+                                        <td>{{ score.semester }}</td>
+                                        <td>{{ score.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    currentPage: 'login',
+                    user: null,
+                    loginForm: {
+                        username: '',
+                        password: '',
+                        verifyCode: ''
+                    },
+                    captcha: {
+                        num1: 0,
+                        num2: 0,
+                        operator: '+',
+                        result: 0
+                    },
+                    adminTab: 'user',
+                    userList: [
+                        { id: 1, username: 'admin', password: '123456', name: '管理员', type: 0, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 2, username: 'teacher1', password: '123456', name: '张老师', type: 1, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 3, username: 'student1', password: '123456', name: '李同学', type: 2, status: 1, createTime: '2024-01-01 00:00:00' }
+                    ],
+                    roleList: [
+                        { id: 1, roleName: '管理员', roleCode: 'admin', description: '系统管理员', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, roleName: '教师', roleCode: 'teacher', description: '教师角色', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, roleName: '学生', roleCode: 'student', description: '学生角色', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    permissionList: [
+                        { id: 1, permissionName: '用户管理', permissionCode: 'user:manage', description: '用户管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, permissionName: '角色管理', permissionCode: 'role:manage', description: '角色管理权限', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, permissionName: '权限管理', permissionCode: 'permission:manage', description: '权限管理权限', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    teacherTab: 'course',
+                    courseList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', credits: 4.0, hours: 64, teacher: '张老师', semester: '第一学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', credits: 3.0, hours: 48, teacher: '李老师', semester: '第一学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', credits: 2.0, hours: 32, teacher: '王老师', semester: '第二学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    studentList: [
+                        { id: 1, studentId: '2024001', name: '李同学', gender: '男', className: '计算机1班', major: '计算机科学与技术' },
+                        { id: 2, studentId: '2024002', name: '王同学', gender: '女', className: '计算机1班', major: '计算机科学与技术' },
+                        { id: 3, studentId: '2024003', name: '张同学', gender: '男', className: '计算机1班', major: '计算机科学与技术' }
+                    ],
+                    studentTab: 'course',
+                    scoreList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', usualScore: 85, finalScore: 90, totalScore: 88, semester: '第一学期', year: '2024-2025' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', usualScore: 80, finalScore: 85, totalScore: 83, semester: '第一学期', year: '2024-2025' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', usualScore: 90, finalScore: 95, totalScore: 93, semester: '第二学期', year: '2024-2025' }
+                    ]
+                };
+            },
+            methods: {
+                generateCaptcha() {
+                    this.captcha.num1 = Math.floor(Math.random() * 10);
+                    this.captcha.num2 = Math.floor(Math.random() * 10);
+                    this.captcha.operator = Math.random() > 0.5 ? '+' : '-';
+                    if (this.captcha.operator === '+') {
+                        this.captcha.result = this.captcha.num1 + this.captcha.num2;
+                    } else {
+                        if (this.captcha.num1 < this.captcha.num2) {
+                            [this.captcha.num1, this.captcha.num2] = [this.captcha.num2, this.captcha.num1];
+                        }
+                        this.captcha.result = this.captcha.num1 - this.captcha.num2;
+                    }
+                },
+                validateCaptcha() {
+                    return parseInt(this.loginForm.verifyCode) === this.captcha.result;
+                },
+                login() {
+                    if (!this.validateCaptcha()) {
+                        alert('验证码错误');
+                        this.generateCaptcha();
+                        return;
+                    }
+                    if (this.loginForm.username === 'admin' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 1,
+                            username: 'admin',
+                            name: '管理员',
+                            type: 0,
+                            status: 1
+                        };
+                        this.currentPage = 'admin';
+                    } else if (this.loginForm.username === 'teacher' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 2,
+                            username: 'teacher',
+                            name: '张老师',
+                            type: 1,
+                            status: 1
+                        };
+                        this.currentPage = 'teacher';
+                    } else if (this.loginForm.username === 'student' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 3,
+                            username: 'student',
+                            name: '李同学',
+                            type: 2,
+                            status: 1
+                        };
+                        this.currentPage = 'student';
+                    } else {
+                        alert('用户名或密码错误');
+                    }
+                },
+                logout() {
+                    this.currentPage = 'login';
+                    this.user = null;
+                }
+            },
+            mounted() {
+                this.generateCaptcha();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

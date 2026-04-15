@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园OA系统</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-form {
+            width: 420px;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        .form-item {
+            margin-bottom: 24px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+        }
+        .container {
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .sidebar a:hover {
+            background-color: #e2e8f0;
+        }
+        .main {
+            flex: 1;
+            margin-left: 20px;
+        }
+        .flex {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div v-if="currentPage === 'login'" class="login-container">
+            <div class="login-form">
+                <h2>校园OA系统</h2>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="loginForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="loginForm.password" class="form-input" placeholder="请输入密码">
+                </div>
+                <button class="btn-primary" @click="login">登录</button>
+            </div>
+        </div>
+        <div v-else class="container">
+            <div class="header">
+                <h1>校园OA系统</h1>
+                <div>
+                    <span>{{ user.name }}</span>
+                    <button class="btn-primary" @click="logout" style="margin-left: 10px; padding: 6px 12px;">退出</button>
+                </div>
+            </div>
+            <div class="flex">
+                <div class="sidebar">
+                    <ul>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'user'">用户管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'role'">角色管理</a></li>
+                        <li v-if="user.type === 0"><a @click="adminTab = 'permission'">权限管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'course'">课程管理</a></li>
+                        <li v-if="user.type === 1"><a @click="teacherTab = 'student'">学生管理</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'course'">课程查询</a></li>
+                        <li v-if="user.type === 2"><a @click="studentTab = 'score'">成绩查询</a></li>
+                    </ul>
+                </div>
+                <div class="main">
+                    <div v-if="user.type === 0">
+                        <div v-if="adminTab === 'user'">
+                            <h2>用户管理</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>用户名</th>
+                                        <th>姓名</th>
+                                        <th>类型</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="user in userList" :key="user.id">
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.type === 0 ? '管理员' : user.type === 1 ? '教师' : '学生' }}</td>
+                                        <td>{{ user.status === 1 ? '启用' : '禁用' }}</td>
+                                        <td>{{ user.createTime }}</td>
+                                        <td>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div v-else-if="user.type === 1">
+                        <div v-if="teacherTab === 'course'">
+                            <h2>课程管理</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                        <td>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">编辑</button>
+                                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div v-else-if="user.type === 2">
+                        <div v-if="studentTab === 'course'">
+                            <h2>课程查询</h2>
+                            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>学分</th>
+                                        <th>学时</th>
+                                        <th>教师</th>
+                                        <th>学期</th>
+                                        <th>学年</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in courseList" :key="course.id">
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.courseName }}</td>
+                                        <td>{{ course.courseCode }}</td>
+                                        <td>{{ course.credits }}</td>
+                                        <td>{{ course.hours }}</td>
+                                        <td>{{ course.teacher }}</td>
+                                        <td>{{ course.semester }}</td>
+                                        <td>{{ course.year }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    currentPage: 'login',
+                    user: null,
+                    loginForm: {
+                        username: '',
+                        password: ''
+                    },
+                    adminTab: 'user',
+                    userList: [
+                        { id: 1, username: 'admin', password: '123456', name: '管理员', type: 0, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 2, username: 'teacher1', password: '123456', name: '张老师', type: 1, status: 1, createTime: '2024-01-01 00:00:00' },
+                        { id: 3, username: 'student1', password: '123456', name: '李同学', type: 2, status: 1, createTime: '2024-01-01 00:00:00' }
+                    ],
+                    teacherTab: 'course',
+                    courseList: [
+                        { id: 1, courseName: '高等数学', courseCode: 'MATH001', credits: 4.0, hours: 64, teacher: '张老师', semester: '第一学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' },
+                        { id: 2, courseName: '大学物理', courseCode: 'PHYS001', credits: 3.0, hours: 48, teacher: '李老师', semester: '第一学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' },
+                        { id: 3, courseName: '计算机基础', courseCode: 'COMP001', credits: 2.0, hours: 32, teacher: '王老师', semester: '第二学期', year: '2024-2025', createTime: '2024-01-01 00:00:00' }
+                    ],
+                    studentTab: 'course'
+                };
+            },
+            methods: {
+                login() {
+                    if (this.loginForm.username === 'admin' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 1,
+                            username: 'admin',
+                            name: '管理员',
+                            type: 0,
+                            status: 1
+                        };
+                        this.currentPage = 'admin';
+                    } else if (this.loginForm.username === 'teacher' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 2,
+                            username: 'teacher',
+                            name: '张老师',
+                            type: 1,
+                            status: 1
+                        };
+                        this.currentPage = 'teacher';
+                    } else if (this.loginForm.username === 'student' && this.loginForm.password === '123456') {
+                        this.user = {
+                            id: 3,
+                            username: 'student',
+                            name: '李同学',
+                            type: 2,
+                            status: 1
+                        };
+                        this.currentPage = 'student';
+                    } else {
+                        alert('用户名或密码错误');
+                    }
+                },
+                logout() {
+                    this.currentPage = 'login';
+                    this.user = null;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试登录</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+        .login-form {
+            width: 400px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-item {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #409eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary:hover {
+            background-color: #66b1ff;
+        }
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: #409eff;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .body {
+            flex: 1;
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar li {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .sidebar li:hover {
+            background-color: #e4e7ed;
+        }
+        .sidebar li.active {
+            background-color: #409eff;
+            color: white;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 登录页面 -->
+        <div v-if="currentPage === 'login'" class="login-container">
+            <div class="login-form">
+                <h2>校园OA系统登录</h2>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="loginForm.username" class="form-input" placeholder="请输入用户名" id="username">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="loginForm.password" class="form-input" placeholder="请输入密码" id="password">
+                </div>
+                <div class="form-item">
+                    <button class="btn-primary" style="width: 100%" @click="login" id="login-button">登录</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 管理员页面 -->
+        <div v-else-if="currentPage === 'admin'" class="container">
+            <div class="header">
+                <h1>校园OA系统 - 管理员控制台</h1>
+                <div>{{ user.name }} <button @click="logout" style="margin-left: 10px; background: none; color: white; border: 1px solid white;">退出登录</button></div>
+            </div>
+            <div class="body">
+                <div class="sidebar">
+                    <ul>
+                        <li :class="{ active: adminTab === 'user' }" @click="adminTab = 'user'">用户管理</li>
+                        <li :class="{ active: adminTab === 'role' }" @click="adminTab = 'role'">角色管理</li>
+                        <li :class="{ active: adminTab === 'permission' }" @click="adminTab = 'permission'">权限管理</li>
+                    </ul>
+                </div>
+                <div class="content">
+                    <div v-if="adminTab === 'user'">
+                        <h3>用户管理</h3>
+                        <p>欢迎来到管理员控制台！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    currentPage: 'login',
+                    user: null,
+                    loginForm: {
+                        username: '',
+                        password: ''
+                    },
+                    adminTab: 'user'
+                }
+            },
+            methods: {
+                login() {
+                    console.log('登录信息:', this.loginForm.username, this.loginForm.password);
+                    if (this.loginForm.username === 'admin' && this.loginForm.password === '123456') {
+                        console.log('管理员登录成功');
+                        this.user = {
+                            id: 1,
+                            username: 'admin',
+                            name: '管理员',
+                            type: 0,
+                            status: 1
+                        };
+                        console.log('设置currentPage为admin');
+                        this.currentPage = 'admin';
+                        console.log('currentPage:', this.currentPage);
+                    } else {
+                        alert('用户名或密码错误');
+                    }
+                },
+                logout() {
+                    this.currentPage = 'login';
+                    this.user = null;
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>

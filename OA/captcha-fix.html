@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园OA系统 - 登录</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-form {
+            width: 420px;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        .form-item {
+            margin-bottom: 24px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+        }
+        .captcha-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .captcha-code {
+            display: flex;
+            align-items: center;
+            background-color: #f0f2f5;
+            padding: 0 10px;
+            border-radius: 4px;
+            height: 40px;
+        }
+        .captcha-refresh {
+            padding: 0 12px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="login-container">
+            <div class="login-form">
+                <h2>校园OA系统</h2>
+                <div class="form-item">
+                    <label class="form-label">用户名</label>
+                    <input type="text" v-model="loginForm.username" class="form-input" placeholder="请输入用户名">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">密码</label>
+                    <input type="password" v-model="loginForm.password" class="form-input" placeholder="请输入密码">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">验证码</label>
+                    <div class="captcha-container">
+                        <input type="text" v-model="loginForm.verifyCode" class="form-input" placeholder="请输入验证码" style="flex: 1;">
+                        <div class="captcha-code">
+                            {{ captcha.num1 }} {{ captcha.operator }} {{ captcha.num2 }} = ?
+                        </div>
+                        <button class="btn-primary captcha-refresh" @click="generateCaptcha">刷新</button>
+                    </div>
+                </div>
+                <button class="btn-primary" @click="login">登录</button>
+                <div style="margin-top: 20px; text-align: center; color: #666;">
+                    测试账号：admin/123456, teacher/123456, student/123456
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    loginForm: {
+                        username: '',
+                        password: '',
+                        verifyCode: ''
+                    },
+                    captcha: {
+                        num1: 0,
+                        num2: 0,
+                        operator: '+',
+                        result: 0
+                    }
+                };
+            },
+            methods: {
+                generateCaptcha() {
+                    this.captcha.num1 = Math.floor(Math.random() * 10);
+                    this.captcha.num2 = Math.floor(Math.random() * 10);
+                    this.captcha.operator = Math.random() > 0.5 ? '+' : '-';
+                    if (this.captcha.operator === '+') {
+                        this.captcha.result = this.captcha.num1 + this.captcha.num2;
+                    } else {
+                        if (this.captcha.num1 < this.captcha.num2) {
+                            [this.captcha.num1, this.captcha.num2] = [this.captcha.num2, this.captcha.num1];
+                        }
+                        this.captcha.result = this.captcha.num1 - this.captcha.num2;
+                    }
+                },
+                validateCaptcha() {
+                    return parseInt(this.loginForm.verifyCode) === this.captcha.result;
+                },
+                login() {
+                    if (!this.validateCaptcha()) {
+                        alert('验证码错误');
+                        this.generateCaptcha();
+                        return;
+                    }
+                    if (this.loginForm.username === 'admin' && this.loginForm.password === '123456') {
+                        alert('管理员登录成功');
+                    } else if (this.loginForm.username === 'teacher' && this.loginForm.password === '123456') {
+                        alert('教师登录成功');
+                    } else if (this.loginForm.username === 'student' && this.loginForm.password === '123456') {
+                        alert('学生登录成功');
+                    } else {
+                        alert('用户名或密码错误');
+                    }
+                }
+            },
+            mounted() {
+                this.generateCaptcha();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

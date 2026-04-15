@@ -1,0 +1,34 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/campus_oa?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  # Redis配置（可选）
+  # redis:
+  #   host: localhost
+  #   port: 6379
+  #   password: 
+  #   database: 0
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.campus.oa.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+# JWT配置
+jwt:
+  secret: campus_oa_secret_key
+  expire: 3600000 # 1小时
+  header: Authorization
+
+# 日志配置
+logging:
+  level:
+    com.campus.oa: debug
